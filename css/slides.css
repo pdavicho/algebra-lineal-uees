@@ -1,0 +1,272 @@
+/* ==========================================================================
+   slides.css — modo presentación (se carga junto a style.css)
+   Tema UEES: vino #821436, tipografía grande para proyector.
+   ========================================================================== */
+
+body.slides-mode {
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.deck {
+  position: fixed;
+  inset: 0;
+}
+
+/* ---------- cada slide ---------- */
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: none;
+  padding: 4.2rem 5vw 4.5rem;
+  overflow-y: auto;
+}
+
+.slide.active {
+  display: flex;
+  flex-direction: column;
+  animation: slide-in .35s ease both;
+}
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateX(2.5rem); }
+  to   { opacity: 1; transform: none; }
+}
+
+.slide.from-left.active { animation-name: slide-in-left; }
+
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-2.5rem); }
+  to   { opacity: 1; transform: none; }
+}
+
+.slide-inner {
+  width: 100%;
+  max-width: 66rem;
+  margin: auto;   /* centra vertical y horizontalmente el contenido */
+}
+
+/* encabezado de slide */
+
+.slide-kicker {
+  display: inline-block;
+  font-weight: 700;
+  font-size: .8rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: .28rem .85rem;
+  border-radius: 999px;
+  margin-bottom: .7rem;
+}
+
+.slide h2.slide-title {
+  font-size: clamp(1.7rem, 3.6vw, 2.6rem);
+  line-height: 1.15;
+  letter-spacing: -.02em;
+  margin: 0 0 1.1rem;
+  padding-bottom: .55rem;
+  border-bottom: 4px solid var(--accent);
+  display: inline-block;
+}
+
+.slide p, .slide li { font-size: 1.12rem; }
+.slide .hint, .slide .dim-tag { font-size: .92rem; }
+
+/* slide de portada de la clase */
+
+.slide.portada { text-align: center; }
+
+.slide.portada .logo-uees {
+  height: 4.2rem;
+  margin-bottom: 1.6rem;
+}
+
+.slide.portada h1 {
+  font-size: clamp(2.3rem, 5.5vw, 3.7rem);
+  line-height: 1.12;
+  letter-spacing: -.02em;
+  margin: .4rem auto .8rem;
+  max-width: 56rem;
+}
+
+.slide.portada h1 .hl { color: var(--accent); }
+
+.slide.portada .lead {
+  font-size: 1.25rem;
+  color: var(--muted);
+  max-width: 46rem;
+  margin: 0 auto;
+}
+
+.slide.portada .meta-row {
+  justify-content: center;
+  margin: 1.4rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.slide.portada .start-hint {
+  margin-top: 2.6rem;
+  color: var(--muted);
+  font-size: .95rem;
+}
+
+.slide.portada .start-hint kbd {
+  font-family: var(--mono);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-bottom-width: 3px;
+  border-radius: 7px;
+  padding: .15rem .55rem;
+  font-size: .85rem;
+}
+
+/* slide de cierre */
+
+.slide.cierre { text-align: center; }
+
+/* columnas dentro de un slide */
+
+.cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.6rem;
+  align-items: start;
+}
+
+@media (max-width: 860px) { .cols { grid-template-columns: 1fr; } }
+
+/* fórmula protagonista */
+
+.big-math {
+  text-align: center;
+  font-size: 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.4rem 1.6rem;
+  margin: 1.4rem 0;
+}
+
+/* tarjetas de tipos de matrices */
+
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: .9rem;
+  margin-top: 1rem;
+}
+
+.type-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: .9rem 1rem;
+  text-align: center;
+}
+
+.type-card .t-name { font-weight: 700; color: var(--accent); margin-bottom: .3rem; }
+.type-card .t-ej { font-family: var(--mono); font-size: .95rem; color: var(--muted); }
+
+/* ---------- chrome fijo del deck ---------- */
+
+.deck-brand {
+  position: fixed;
+  top: .9rem;
+  left: 1.2rem;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  text-decoration: none;
+}
+
+.deck-brand img { height: 2rem; width: auto; }
+
+.deck-brand .deck-label {
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--muted);
+  border-left: 1px solid var(--line);
+  padding-left: .7rem;
+  white-space: nowrap;
+}
+
+.deck-controls {
+  position: fixed;
+  right: 1.1rem;
+  bottom: 1rem;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+}
+
+.deck-controls .counter {
+  font-family: var(--mono);
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--muted);
+  min-width: 4.2rem;
+  text-align: center;
+}
+
+.deck-controls button {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  color: var(--accent);
+  font-size: 1.15rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background .12s ease, border-color .12s ease;
+  box-shadow: var(--shadow);
+}
+
+.deck-controls button:hover { background: var(--accent-soft); border-color: var(--accent); }
+.deck-controls button:disabled { opacity: .35; cursor: default; }
+
+.deck-progress {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  height: 5px;
+  background: var(--accent);
+  z-index: 95;
+  transition: width .3s ease;
+}
+
+.deck-home {
+  position: fixed;
+  left: 1.2rem;
+  bottom: .95rem;
+  z-index: 90;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: none;
+  padding: .3rem .7rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.deck-home:hover { color: var(--accent); border-color: var(--accent); }
+
+/* impresión: todos los slides seguidos */
+
+@media print {
+  body.slides-mode { overflow: visible; }
+  .deck { position: static; }
+  .slide { position: static; display: block !important; page-break-after: always; }
+  .deck-brand, .deck-controls, .deck-progress, .deck-home { display: none; }
+}

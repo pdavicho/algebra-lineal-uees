@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Clase 01 · ¿Qué es una matriz? — Álgebra Lineal UEES</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧮</text></svg>">
+  <link rel="icon" href="../../assets/logo-uees.png">
   <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/slides.css">
   <!-- KaTeX para fórmulas matemáticas -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
@@ -13,300 +14,454 @@
 </head>
 <body>
 
-<header class="site-header">
-  <div class="bar">
-    <a class="brand" href="../../index.html">
-      <span class="logo">[A]</span>
-      Álgebra Lineal <small>· UMAT205 · UEES</small>
-    </a>
-    <nav>
-      <a href="../../index.html#clases">Todas las clases</a>
-    </nav>
-  </div>
-</header>
+<div class="deck">
 
-<main class="wrap">
-
-  <!-- ================= ENCABEZADO DE LA CLASE ================= -->
-  <section class="class-hero">
-    <div class="meta-row">
-      <span class="class-num">Clase 01</span>
-      <span class="chip teoria">Teoría</span>
-      <span class="chip u1">Unidad 1 · Matrices y determinantes</span>
-      <span class="chip soon" style="text-transform:none">Sesión S1 del sílabo · RDA1 · 2 horas</span>
-    </div>
-    <h1>¿Qué es una matriz? Definición, tipos y operaciones</h1>
-    <p class="lead">
-      Hoy descubrirás que ya vives rodeado de matrices: cada foto de tu teléfono,
-      cada tabla de datos y cada red neuronal de la IA <b>es</b> una matriz.
-      Aprenderemos a nombrarlas, clasificarlas y operar con ellas.
-    </p>
-
-    <div class="objetivos">
-      <h2>Objetivos de la clase (RDA1 del sílabo)</h2>
-      <ul>
-        <li>Definir qué es una matriz, su dimensión y la notación $a_{ij}$ de sus elementos.</li>
-        <li>Identificar los tipos de matrices: fila, columna, cuadrada, nula, identidad, diagonal y triangular.</li>
-        <li>Realizar suma, resta, multiplicación por escalar y <b>producto de matrices</b>, verificando la compatibilidad de dimensiones.</li>
-        <li>Reconocer dónde aparecen las matrices en la Inteligencia Artificial.</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- ================= 1. GANCHO ================= -->
-  <section class="section" id="gancho">
-    <div class="section-head">
-      <span class="section-num">1</span>
-      <h2>Estás rodeado de matrices</h2>
-      <span class="time-chip">⏱ 10 min</span>
-    </div>
-
-    <p>
-      Antes de dar una sola definición, mira esta “foto” en escala de grises.
-      Parece una imagen… pero para la computadora <b>es una tabla de números</b>.
-      Mueve el control y descubre lo que hay detrás de cada píxel:
-    </p>
-
-    <div class="demo">
-      <div class="demo-title">Demo · Una imagen ES una matriz</div>
-      <div id="demo-pixel"></div>
-    </div>
-
-    <div class="callout">
-      <p class="callout-title">💡 Idea clave</p>
-      <p>
-        Una imagen de tu celular de 12 megapíxeles es una matriz de unos
-        $3000 \times 4000$ números (¡por cada canal de color!). Cuando un filtro de
-        Instagram “aclara” tu foto, está haciendo <b>operaciones con matrices</b> —
-        exactamente las que aprenderás hoy.
-      </p>
-    </div>
-  </section>
-
-  <!-- ================= 2. DEFINICIÓN Y NOTACIÓN ================= -->
-  <section class="section" id="definicion">
-    <div class="section-head">
-      <span class="section-num">2</span>
-      <h2>Definición, dimensión y tipos de matrices</h2>
-      <span class="time-chip">⏱ 20 min</span>
-    </div>
-
-    <div class="card">
-      <p style="margin-top:0">
-        <b>Definición.</b> Una <b>matriz</b> es un arreglo rectangular de números
-        organizados en $m$ <b>filas</b> y $n$ <b>columnas</b>. Se dice que su
-        <b>dimensión</b> (u orden) es $m \times n$:
-      </p>
-      $$A = \begin{pmatrix} a_{11} & a_{12} & \cdots & a_{1n} \\ a_{21} & a_{22} & \cdots & a_{2n} \\ \vdots & \vdots & \ddots & \vdots \\ a_{m1} & a_{m2} & \cdots & a_{mn} \end{pmatrix}$$
-      <p>
-        Cada elemento se nombra $a_{ij}$: primero la <b>fila</b> $i$, luego la
-        <b>columna</b> $j$. Así, $a_{23}$ es el número que está en la fila 2, columna 3.
-        <i>El orden importa: $a_{23} \neq a_{32}$.</i>
-      </p>
-    </div>
-
-    <p>
-      Ahora experimenta tú (o pídele valores al curso 😄): edita la matriz, cambia sus
-      dimensiones y observa cómo cambia su <b>clasificación</b>:
-    </p>
-
-    <div class="demo">
-      <div class="demo-title">Demo · Explorador de matrices</div>
-      <div id="demo-explorer"></div>
-    </div>
-
-    <h3>Reto rápido en vivo 🎤</h3>
-    <ul>
-      <li>Construyan una matriz que sea <b>triangular superior</b> pero no diagonal.</li>
-      <li>¿Puede una matriz ser fila y columna a la vez? (Pista: prueben $1 \times 1$.)</li>
-      <li>¿Por qué la <b>identidad</b> $I_n$ solo existe si la matriz es cuadrada?</li>
-    </ul>
-  </section>
-
-  <!-- ================= 3. OPERACIONES ================= -->
-  <section class="section" id="operaciones">
-    <div class="section-head">
-      <span class="section-num">3</span>
-      <h2>Operaciones con matrices</h2>
-      <span class="time-chip">⏱ 40 min</span>
-    </div>
-
-    <h3>3.1 Suma y resta: elemento a elemento</h3>
-    <p>
-      Dos matrices se pueden sumar <b>solo si tienen la misma dimensión</b>.
-      El resultado se obtiene sumando cada pareja de elementos correspondientes:
-      $(A+B)_{ij} = a_{ij} + b_{ij}$.
-    </p>
-
-    <div class="demo">
-      <div class="demo-title">Demo · Suma elemento a elemento</div>
-      <div id="demo-sum"></div>
-    </div>
-
-    <h3>3.2 Multiplicación por un escalar</h3>
-    <p>
-      Un <b>escalar</b> (un número real $k$) multiplica a <b>todos</b> los elementos:
-      $(kA)_{ij} = k \cdot a_{ij}$. Es la operación detrás de “subir el brillo” de una foto.
-    </p>
-
-    <div class="demo">
-      <div class="demo-title">Demo · Escalar por matriz</div>
-      <div id="demo-scalar"></div>
-    </div>
-
-    <h3>3.3 Producto de matrices: fila × columna</h3>
-    <p>
-      La estrella de la clase. El producto $A \cdot B$ <b>no</b> se hace elemento a
-      elemento: cada celda del resultado nace del “choque” de una <b>fila de $A$</b>
-      con una <b>columna de $B$</b>:
-    </p>
-    $$c_{ij} = \sum_{k=1}^{n} a_{ik}\, b_{kj} = a_{i1}b_{1j} + a_{i2}b_{2j} + \cdots + a_{in}b_{nj}$$
-    <p>
-      Para que el choque sea posible, las <b>columnas de $A$</b> deben coincidir con las
-      <b>filas de $B$</b>: $(m \times n) \cdot (n \times p) = m \times p$.
-    </p>
-
-    <div class="demo">
-      <div class="demo-title">Demo · Producto de matrices paso a paso</div>
-      <div id="demo-product"></div>
-    </div>
-
-    <div class="callout warn">
-      <p class="callout-title">⚠️ Cuidado: el producto NO es conmutativo</p>
-      <p>
-        En general $A \cdot B \neq B \cdot A$. A veces $B\cdot A$ ni siquiera existe:
-        si $A$ es $2\times 3$ y $B$ es $3 \times 2$, entonces $A\cdot B$ es $2\times 2$
-        pero $B \cdot A$ es $3 \times 3$. ¡Compruébalo en la demo cambiando las dimensiones!
-      </p>
-    </div>
-
-    <h3>Propiedades que sí se cumplen (1.3 del sílabo)</h3>
-    <div class="card">
-      <table class="simple">
-        <tr><th>Propiedad</th><th>Enunciado</th></tr>
-        <tr><td>Conmutativa (suma)</td><td>$A + B = B + A$</td></tr>
-        <tr><td>Asociativa (suma)</td><td>$(A + B) + C = A + (B + C)$</td></tr>
-        <tr><td>Neutro aditivo</td><td>$A + 0 = A$ &nbsp;(matriz nula)</td></tr>
-        <tr><td>Asociativa (producto)</td><td>$(AB)C = A(BC)$</td></tr>
-        <tr><td>Distributiva</td><td>$A(B + C) = AB + AC$</td></tr>
-        <tr><td>Neutro multiplicativo</td><td>$A \cdot I = I \cdot A = A$ &nbsp;(identidad)</td></tr>
-        <tr><td>Escalares</td><td>$k(A + B) = kA + kB$</td></tr>
-      </table>
-    </div>
-  </section>
-
-  <!-- ================= 4. CONEXIÓN CON IA ================= -->
-  <section class="section" id="ia">
-    <div class="section-head">
-      <span class="section-num">4</span>
-      <h2>¿Dónde está esto en un LLM?</h2>
-      <span class="time-chip">⏱ 15 min</span>
-    </div>
-
-    <div class="callout ia">
-      <p class="callout-title">🤖 Álgebra lineal → Inteligencia Artificial</p>
-      <p>
-        Un modelo de lenguaje como ChatGPT, Claude o Gemini es, en su núcleo,
-        <b>una colección gigantesca de matrices</b> y las operaciones que acabas de aprender:
-      </p>
-      <ul>
-        <li>
-          <b>Los “pesos” del modelo son matrices.</b> Cuando lees que un modelo tiene
-          “70 mil millones de parámetros”, significa que la suma de los elementos de
-          todas sus matrices da 70&nbsp;000&nbsp;000&nbsp;000 de números $a_{ij}$.
-        </li>
-        <li>
-          <b>Cada palabra es una fila de una matriz.</b> El modelo guarda una matriz de
-          <i>embeddings</i> $E$ de dimensión $V \times d$: una fila por cada palabra de su
-          vocabulario ($V \approx 100\,000$) con $d$ números que capturan su significado
-          ($d \approx 4096$). “gato” no es texto para el modelo: es un vector de 4096 números.
-        </li>
-        <li>
-          <b>Pensar = multiplicar matrices.</b> Para generar cada palabra de una respuesta,
-          el modelo ejecuta miles de productos $A \cdot B$ como el de la demo — solo que con
-          matrices de miles de filas y columnas, en paralelo sobre una GPU.
-        </li>
-      </ul>
-      <p>
-        En las clases <b>12, 14 y 16</b> abriremos esa matriz de embeddings en Colab,
-        haremos aritmética con palabras (rey − hombre + mujer ≈ reina) y construiremos
-        un mini buscador semántico. Todo con las operaciones de hoy.
-      </p>
-    </div>
-  </section>
-
-  <!-- ================= 5. QUIZ ================= -->
-  <section class="section" id="quiz">
-    <div class="section-head">
-      <span class="section-num">5</span>
-      <h2>Quiz de la clase</h2>
-      <span class="time-chip">⏱ 15 min</span>
-    </div>
-    <p>
-      Diez preguntas de opción múltiple, en el mismo formato de las evaluaciones de
-      Blackboard. Respóndelas y presiona <b>Calificar</b> para ver tu retroalimentación.
-    </p>
-    <div id="quiz-clase01"></div>
-  </section>
-
-  <!-- ================= 6. COLAB ================= -->
-  <section class="section" id="colab">
-    <div class="section-head">
-      <span class="section-num">6</span>
-      <h2>Práctica en Google Colab</h2>
-      <span class="time-chip">⏱ 20 min</span>
-    </div>
-    <p>
-      Cerramos programando: en el notebook de esta clase crearás tus primeras matrices con
-      <b>NumPy</b>, harás las cuatro operaciones y comprobarás con código que una imagen es
-      una matriz (y le subirás el brillo multiplicando por un escalar 😎).
-    </p>
-
-    <div class="colab-box">
-      <span class="icon">🐍</span>
-      <div class="txt">
-        <p><b>Notebook · Clase 01:</b> Matrices con NumPy — tu primera imagen como matriz.</p>
-        <p>No necesitas instalar nada: se abre y se ejecuta en tu navegador con tu cuenta de Google.</p>
+  <!-- ============ 1 · PORTADA ============ -->
+  <section class="slide portada">
+    <div class="slide-inner">
+      <img class="logo-uees" src="../../assets/logo-uees.png" alt="Universidad Espíritu Santo">
+      <div class="meta-row">
+        <span class="chip teoria">Clase 01 · Teoría</span>
+        <span class="chip u1">Unidad 1 · Matrices y determinantes</span>
       </div>
-      <a class="colab-btn" data-notebook="notebooks/clase-01.ipynb" href="#">
-        ▶ Abrir en Colab
-      </a>
+      <h1>¿Qué es una <span class="hl">matriz</span>?</h1>
+      <p class="lead">
+        Definición, tipos y operaciones — y por qué cada foto de tu teléfono
+        y cada Inteligencia Artificial que usas <b>es</b> álgebra lineal.
+      </p>
+      <p class="start-hint">Usa <kbd>←</kbd> <kbd>→</kbd> o los botones para navegar · <kbd>F</kbd> pantalla completa</p>
     </div>
+  </section>
 
-    <div class="callout">
-      <p class="callout-title">📝 Tarea (actividad en Blackboard)</p>
+  <!-- ============ 2 · OBJETIVOS ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Hoy vas a lograr</span>
+      <h2 class="slide-title">Objetivos de la clase</h2>
+      <ul>
+        <li><b>Definir</b> qué es una matriz, su dimensión y la notación $a_{ij}$ de sus elementos.</li>
+        <li><b>Identificar</b> los tipos de matrices: fila, columna, cuadrada, nula, identidad, diagonal y triangular.</li>
+        <li><b>Operar</b>: suma, resta, multiplicación por escalar y <b>producto de matrices</b>, verificando la compatibilidad de dimensiones.</li>
+        <li><b>Reconocer</b> dónde viven las matrices dentro de la Inteligencia Artificial.</li>
+      </ul>
+      <div class="callout">
+        <p class="callout-title">📌 En el sílabo</p>
+        <p>Temas 1.1, 1.2 y 1.3 de la Unidad 1 · Resultado de aprendizaje RDA1.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3 · GANCHO: DEMO PÍXELES ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Para empezar</span>
+      <h2 class="slide-title">¿Qué ves aquí?</h2>
       <p>
-        Resuelve la actividad de la Unidad 1 publicada en Blackboard: preguntas de opción
-        múltiple con la respectiva resolución o demostración del proceso matemático.
-        <b>Plazo: 7 días a partir de la publicación.</b>
+        Parece una imagen… pero para la computadora es otra cosa.
+        <b>Mueve el control</b> y descubre lo que hay detrás de cada píxel.
+        Pasa el mouse sobre la imagen para inspeccionar cada valor.
+      </p>
+      <div class="demo">
+        <div class="demo-title">Demo · Una imagen ES una matriz</div>
+        <div id="demo-pixel"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4 · IDEA CLAVE ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Idea clave</span>
+      <h2 class="slide-title">Ya vives rodeado de matrices</h2>
+      <div class="cols">
+        <div class="card">
+          <p style="margin:0">📷 <b>Tu cámara de 12 megapíxeles</b> guarda cada foto como una matriz de
+          $3000 \times 4000$ números por canal de color.</p>
+        </div>
+        <div class="card">
+          <p style="margin:0">🎛️ <b>Un filtro de Instagram</b> que aclara tu foto está multiplicando
+          esa matriz por un escalar. Hoy aprenderás a hacer exactamente eso.</p>
+        </div>
+        <div class="card">
+          <p style="margin:0">📊 <b>Una tabla de Excel</b> con notas de estudiantes: filas = personas,
+          columnas = materias. Eso es una matriz de datos.</p>
+        </div>
+        <div class="card">
+          <p style="margin:0">🤖 <b>ChatGPT, Claude o Gemini</b>: miles de millones de números $a_{ij}$
+          organizados en matrices gigantes. Lo veremos al final de la clase.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 5 · DEFINICIÓN ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Definición · Tema 1.1</span>
+      <h2 class="slide-title">La definición formal</h2>
+      <p>
+        Una <b>matriz</b> es un arreglo rectangular de números organizados en
+        $m$ <b>filas</b> y $n$ <b>columnas</b>. Su <b>dimensión</b> (u orden) es $m \times n$:
+      </p>
+      <div class="big-math">
+        $$A = \begin{pmatrix} a_{11} & a_{12} & \cdots & a_{1n} \\ a_{21} & a_{22} & \cdots & a_{2n} \\ \vdots & \vdots & \ddots & \vdots \\ a_{m1} & a_{m2} & \cdots & a_{mn} \end{pmatrix}$$
+      </div>
+      <p>
+        Se escribe con letra <b>mayúscula</b> ($A$, $B$, $C$…) y sus elementos con
+        minúscula y dos subíndices: $a_{ij}$.
       </p>
     </div>
   </section>
 
-  <!-- ================= NAVEGACIÓN ================= -->
-  <nav class="class-nav" id="class-nav"></nav>
+  <!-- ============ 6 · NOTACIÓN a_ij ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Notación</span>
+      <h2 class="slide-title">El nombre de cada elemento: $a_{ij}$</h2>
+      <div class="cols">
+        <div>
+          <p>
+            El subíndice se lee siempre en el mismo orden:
+            primero la <b>fila</b> $i$, después la <b>columna</b> $j$.
+          </p>
+          <div class="big-math">$$a_{\underbrace{2}_{\text{fila}}\,\underbrace{3}_{\text{columna}}}$$</div>
+        </div>
+        <div>
+          <div class="callout warn">
+            <p class="callout-title">⚠️ El orden importa</p>
+            <p>
+              $a_{23}$ y $a_{32}$ son elementos <b>diferentes</b>. Confundirlos es el error
+              más común de toda la unidad — revísalo dos veces en el examen.
+            </p>
+          </div>
+          <p>En la matriz $\begin{pmatrix} 7 & -2 & 4 \\ 0 & 9 & 1 \end{pmatrix}$:
+             $a_{13} = 4$, &nbsp;$a_{21} = 0$, &nbsp;¿y $a_{23}$?</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-</main>
+  <!-- ============ 7 · DEMO EXPLORADOR + RETOS ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Manos a la obra</span>
+      <h2 class="slide-title">Explorador de matrices</h2>
+      <p>Edita los valores, cambia las dimensiones y observa cómo cambia la clasificación.</p>
+      <div class="demo">
+        <div class="demo-title">Demo · Explorador de matrices</div>
+        <div id="demo-explorer"></div>
+      </div>
+      <div class="callout">
+        <p class="callout-title">🎯 Ahora tú</p>
+        <p>
+          1. Construye una matriz <b>triangular superior</b> que no sea diagonal. &nbsp;
+          2. ¿Puede una matriz ser fila y columna a la vez? Prueba con $1 \times 1$. &nbsp;
+          3. ¿Por qué la <b>identidad</b> solo existe si la matriz es cuadrada?
+        </p>
+      </div>
+    </div>
+  </section>
 
-<footer class="site-footer">
-  <div class="wrap">
-    Clase 01 · Álgebra Lineal · UMAT205 · UEES — Unidad 1: Matrices y determinantes.
-  </div>
-</footer>
+  <!-- ============ 8 · TIPOS DE MATRICES ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Clasificación</span>
+      <h2 class="slide-title">Tipos de matrices</h2>
+      <div class="type-grid">
+        <div class="type-card"><div class="t-name">Fila</div><div class="t-ej">$\begin{pmatrix} 3 & 0 & -1 \end{pmatrix}$</div><p class="hint">una sola fila ($1 \times n$)</p></div>
+        <div class="type-card"><div class="t-name">Columna</div><div class="t-ej">$\begin{pmatrix} 3 \\ 0 \end{pmatrix}$</div><p class="hint">una sola columna ($m \times 1$)</p></div>
+        <div class="type-card"><div class="t-name">Cuadrada</div><div class="t-ej">$\begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}$</div><p class="hint">filas = columnas ($n \times n$)</p></div>
+        <div class="type-card"><div class="t-name">Nula</div><div class="t-ej">$\begin{pmatrix} 0 & 0 \\ 0 & 0 \end{pmatrix}$</div><p class="hint">todos sus elementos son 0</p></div>
+        <div class="type-card"><div class="t-name">Identidad $I_n$</div><div class="t-ej">$\begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$</div><p class="hint">1 en la diagonal, 0 fuera</p></div>
+        <div class="type-card"><div class="t-name">Diagonal</div><div class="t-ej">$\begin{pmatrix} 7 & 0 \\ 0 & 2 \end{pmatrix}$</div><p class="hint">0 fuera de la diagonal</p></div>
+        <div class="type-card"><div class="t-name">Triangular superior</div><div class="t-ej">$\begin{pmatrix} 1 & 5 \\ 0 & 3 \end{pmatrix}$</div><p class="hint">0 debajo de la diagonal</p></div>
+        <div class="type-card"><div class="t-name">Triangular inferior</div><div class="t-ej">$\begin{pmatrix} 1 & 0 \\ 8 & 3 \end{pmatrix}$</div><p class="hint">0 encima de la diagonal</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 9 · OPERACIONES: MAPA ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Tema 1.2</span>
+      <h2 class="slide-title">Las cuatro operaciones de hoy</h2>
+      <div class="type-grid">
+        <div class="type-card"><div class="t-name">➕ Suma</div><p class="hint">elemento a elemento<br>misma dimensión</p></div>
+        <div class="type-card"><div class="t-name">➖ Resta</div><p class="hint">elemento a elemento<br>misma dimensión</p></div>
+        <div class="type-card"><div class="t-name">✖️ Por escalar</div><p class="hint">un número multiplica<br>a toda la matriz</p></div>
+        <div class="type-card" style="border-color:var(--accent); border-width:2px"><div class="t-name">⭐ Producto A·B</div><p class="hint">fila × columna<br>la estrella de la clase</p></div>
+      </div>
+      <p style="margin-top:1.4rem">
+        Las tres primeras funcionan como te imaginas. La cuarta tiene una regla
+        especial que es <b>la base de toda la computación moderna</b>.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ 10 · SUMA + DEMO ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Operación 1 y 2</span>
+      <h2 class="slide-title">Suma y resta: elemento a elemento</h2>
+      <p>
+        Solo se pueden sumar matrices de la <b>misma dimensión</b>:
+        $(A+B)_{ij} = a_{ij} + b_{ij}$. Pasa el mouse por el resultado:
+      </p>
+      <div class="demo">
+        <div class="demo-title">Demo · Suma elemento a elemento</div>
+        <div id="demo-sum"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 11 · ESCALAR + DEMO ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Operación 3</span>
+      <h2 class="slide-title">Multiplicación por un escalar</h2>
+      <p>
+        Un <b>escalar</b> (un número real $k$) multiplica a <b>todos</b> los elementos:
+        $(kA)_{ij} = k \cdot a_{ij}$. Mueve el control y observa qué pasa con
+        $k = 0$, $k = 1$ y $k$ negativo:
+      </p>
+      <div class="demo">
+        <div class="demo-title">Demo · Escalar por matriz</div>
+        <div id="demo-scalar"></div>
+      </div>
+      <p class="hint">Es la operación detrás de “subir el brillo” de una foto: cada píxel × 1.5.</p>
+    </div>
+  </section>
+
+  <!-- ============ 12 · PRODUCTO: LA REGLA ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Operación 4 · la estrella ⭐</span>
+      <h2 class="slide-title">Producto de matrices: fila × columna</h2>
+      <p>
+        El producto $A \cdot B$ <b>no</b> se hace elemento a elemento. Cada celda del
+        resultado nace del “choque” de una <b>fila de $A$</b> con una <b>columna de $B$</b>:
+      </p>
+      <div class="big-math">
+        $$c_{ij} = \sum_{k=1}^{n} a_{ik}\, b_{kj} = a_{i1}b_{1j} + a_{i2}b_{2j} + \cdots + a_{in}b_{nj}$$
+      </div>
+      <p>
+        Y solo es posible si las dimensiones encajan:
+        $$(m \times \underline{n}) \cdot (\underline{n} \times p) = m \times p$$
+        las <b>columnas de $A$</b> deben coincidir con las <b>filas de $B$</b>.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ 13 · DEMO PRODUCTO ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Manos a la obra</span>
+      <h2 class="slide-title">El producto, paso a paso</h2>
+      <p>Observa qué fila y qué columna producen cada celda del resultado:</p>
+      <div class="demo">
+        <div class="demo-title">Demo · Producto de matrices paso a paso</div>
+        <div id="demo-product"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 14 · NO CONMUTATIVO ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Cuidado</span>
+      <h2 class="slide-title">El producto NO es conmutativo</h2>
+      <div class="callout warn">
+        <p class="callout-title">⚠️ En general, $A \cdot B \neq B \cdot A$</p>
+        <p>
+          A veces $B \cdot A$ ni siquiera existe: si $A$ es $2\times 3$ y $B$ es $3 \times 2$,
+          entonces $A\cdot B$ es $2\times 2$… pero $B \cdot A$ es $3 \times 3$.
+        </p>
+      </div>
+      <p>
+        🎯 <b>Compruébalo tú:</b> vuelve a la demo anterior (<kbd>←</kbd>), cambia las
+        dimensiones de $A$ y $B$, y verifica qué tamaño tiene cada producto.
+      </p>
+      <div class="callout">
+        <p class="callout-title">💡 ¿Por qué importa?</p>
+        <p>
+          En el examen, el orden de los factores <b>sí</b> altera el producto.
+          Y en programación, invertir el orden de una multiplicación de matrices
+          es un bug clásico que produce resultados sin sentido.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 15 · PROPIEDADES ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Tema 1.3</span>
+      <h2 class="slide-title">Propiedades de las operaciones</h2>
+      <div class="card">
+        <table class="simple">
+          <tr><th>Propiedad</th><th>Enunciado</th></tr>
+          <tr><td>Conmutativa (suma)</td><td>$A + B = B + A$</td></tr>
+          <tr><td>Asociativa (suma)</td><td>$(A + B) + C = A + (B + C)$</td></tr>
+          <tr><td>Neutro aditivo</td><td>$A + 0 = A$ &nbsp;(matriz nula)</td></tr>
+          <tr><td>Asociativa (producto)</td><td>$(AB)C = A(BC)$</td></tr>
+          <tr><td>Distributiva</td><td>$A(B + C) = AB + AC$</td></tr>
+          <tr><td>Neutro multiplicativo</td><td>$A \cdot I = I \cdot A = A$ &nbsp;(identidad)</td></tr>
+          <tr><td>Escalares</td><td>$k(A + B) = kA + kB$</td></tr>
+        </table>
+      </div>
+      <p class="hint">La única “propiedad esperada” que falta en la lista es la conmutativa del producto — porque no se cumple.</p>
+    </div>
+  </section>
+
+  <!-- ============ 16 · IA: PESOS ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Conexión con la IA · 1 de 2</span>
+      <h2 class="slide-title">Un LLM es una colección de matrices</h2>
+      <div class="callout ia">
+        <p class="callout-title">🤖 ¿Qué hay dentro de ChatGPT, Claude o Gemini?</p>
+        <p>
+          Cuando lees que un modelo tiene <b>“70 mil millones de parámetros”</b>, significa
+          exactamente esto: la suma de los elementos $a_{ij}$ de todas sus matrices da
+          70 000 000 000 de números.
+        </p>
+        <p>
+          Esos números — los <b>pesos</b> del modelo — se organizan en matrices,
+          y “entrenar” la IA es el proceso de encontrar los valores correctos para cada $a_{ij}$.
+        </p>
+      </div>
+      <p>
+        La matriz $3\times 3$ que editaste hace unos slides y una matriz de un LLM son
+        <b>el mismo objeto matemático</b> — solo cambia el tamaño: de 9 elementos a miles de millones.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ 17 · IA: EMBEDDINGS ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Conexión con la IA · 2 de 2</span>
+      <h2 class="slide-title">Cada palabra es una fila de una matriz</h2>
+      <div class="cols">
+        <div>
+          <p>
+            El modelo guarda una matriz de <b>embeddings</b> $E$ de dimensión $V \times d$:
+          </p>
+          <ul>
+            <li>una <b>fila por cada palabra</b> de su vocabulario ($V \approx 100\,000$),</li>
+            <li>con $d \approx 4096$ números que capturan su <b>significado</b>.</li>
+          </ul>
+          <p>Para el modelo, “gato” no es texto: es un vector de 4096 números.</p>
+        </div>
+        <div>
+          <div class="big-math" style="font-size:1rem">
+            $$E = \begin{pmatrix} 0.21 & -0.87 & \cdots \\ 0.19 & -0.85 & \cdots \\ -0.64 & 0.02 & \cdots \\ \vdots & \vdots & \ddots \end{pmatrix} \begin{matrix} \leftarrow \text{gato} \\ \leftarrow \text{tigre} \\ \leftarrow \text{taladro} \\ \, \end{matrix}$$
+          </div>
+          <p class="hint">Filas parecidas = significados parecidos. “gato” y “tigre” son casi paralelos.</p>
+        </div>
+      </div>
+      <div class="callout ia">
+        <p class="callout-title">🔮 Lo que viene</p>
+        <p>
+          En las clases <b>12, 14 y 16</b> abriremos una matriz de embeddings real en Colab,
+          haremos aritmética con palabras (rey − hombre + mujer ≈ reina) y construiremos un
+          buscador semántico. Todo con las operaciones de hoy.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 18 · QUIZ ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Comprueba lo aprendido</span>
+      <h2 class="slide-title">Quiz de la clase</h2>
+      <p>
+        Diez preguntas en el mismo formato de las evaluaciones de Blackboard.
+        Responde y presiona <b>Calificar</b> para ver tu retroalimentación.
+      </p>
+      <div id="quiz-clase01"></div>
+    </div>
+  </section>
+
+  <!-- ============ 19 · COLAB ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">A programar 🐍</span>
+      <h2 class="slide-title">Práctica en Google Colab</h2>
+      <p>
+        Hora de escribir código: en el notebook de esta clase crearás tus primeras matrices
+        con <b>NumPy</b>, harás las cuatro operaciones y comprobarás que una imagen es una
+        matriz — subiéndole el brillo con una multiplicación por escalar.
+      </p>
+      <div class="colab-box">
+        <span class="icon">🐍</span>
+        <div class="txt">
+          <p><b>Notebook · Clase 01:</b> Matrices con NumPy — tu primera imagen como matriz.</p>
+          <p>Se abre y se ejecuta en tu navegador con tu cuenta de Google. Nada que instalar.</p>
+        </div>
+        <a class="colab-btn" data-notebook="notebooks/clase-01.ipynb" href="#">▶ Abrir en Colab</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 20 · TAREA ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Antes de irte</span>
+      <h2 class="slide-title">Tarea de la semana</h2>
+      <div class="callout">
+        <p class="callout-title">📝 Actividad en Blackboard</p>
+        <p>
+          Resuelve la actividad de la Unidad 1: preguntas de opción múltiple con la
+          respectiva resolución o demostración del proceso matemático.
+        </p>
+        <p><b>Plazo: 7 días a partir de la publicación.</b></p>
+      </div>
+      <div class="callout ia">
+        <p class="callout-title">💪 Reto opcional</p>
+        <p>
+          Termina los dos retos del notebook de Colab y trae a la próxima clase
+          una foto tuya editada solo con operaciones de matrices.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 21 · CIERRE ============ -->
+  <section class="slide cierre">
+    <div class="slide-inner">
+      <img class="logo-uees" src="../../assets/logo-uees.png" alt="UEES" style="height:3.2rem;margin-bottom:1rem">
+      <h2 class="slide-title" style="border:none">Lo que te llevas hoy</h2>
+      <div class="type-grid" style="text-align:left">
+        <div class="type-card"><div class="t-name">✔ Matriz</div><p class="hint">arreglo $m \times n$; elemento $a_{ij}$ = fila $i$, columna $j$</p></div>
+        <div class="type-card"><div class="t-name">✔ Tipos</div><p class="hint">fila, columna, cuadrada, nula, identidad, diagonal, triangular</p></div>
+        <div class="type-card"><div class="t-name">✔ Operaciones</div><p class="hint">suma/resta y escalar (elemento a elemento); producto = fila × columna</p></div>
+        <div class="type-card"><div class="t-name">✔ IA</div><p class="hint">un LLM son matrices gigantes; cada palabra, una fila de $E$</p></div>
+      </div>
+      <p style="margin-top:2rem">
+        <b>Próxima clase:</b> NumPy a fondo — matrices como datos y tu primera
+        imagen manipulada con código. 📸
+      </p>
+      <p><a class="colab-btn" href="../clase-02/index.html" style="background:var(--accent);color:#fff">Ir a la Clase 02 →</a></p>
+    </div>
+  </section>
+
+</div>
 
 <script src="../../js/common.js"></script>
 <script src="../../js/quiz.js"></script>
 <script src="../../js/viz/matrix-viz.js"></script>
+<script src="../../js/slides.js"></script>
 <script>
-  // Demos interactivas de la clase
+  // Demos interactivas
   initPixelDemo("demo-pixel");
   initMatrixExplorer("demo-explorer");
   initMatrixSum("demo-sum");
   initScalarDemo("demo-scalar");
   initMatrixProduct("demo-product");
-  renderClassNav("class-nav", 1);
 
-  // Quiz de la clase (formato Blackboard: opción múltiple + proceso)
+  // Quiz (formato Blackboard: opción múltiple + proceso)
   const PREGUNTAS = [
     {
       q: "Una matriz de dimensión $3 \\times 5$ tiene…",
@@ -400,12 +555,12 @@
     },
   ];
 
-  // Renderiza el quiz cuando KaTeX esté disponible (los scripts van con defer).
   window.addEventListener("DOMContentLoaded", () => {
     renderQuiz("quiz-clase01", PREGUNTAS);
     if (window.renderMathInElement) {
       renderMathInElement(document.body, KATEX_OPTS);
     }
+    initDeck({ label: "Clase 01 · ¿Qué es una matriz? · Álgebra Lineal UMAT205" });
   });
 </script>
 </body>

@@ -4,8 +4,9 @@ Sitio web del curso **Álgebra Lineal (UMAT205)** de la Universidad Espíritu Sa
 (Educación a Distancia, 2026). Cada concepto del sílabo se enseña de tres formas
 complementarias:
 
-1. **Teoría visual e interactiva** en el navegador: matrices editables, producto de
-   matrices animado paso a paso, quizzes autocalificados.
+1. **Slides interactivos** en el navegador (identidad institucional UEES): matrices
+   editables, producto de matrices animado paso a paso, quizzes autocalificados.
+   Navegación con `←`/`→`, `F` para pantalla completa.
 2. **Práctica en Python** con notebooks de Google Colab (NumPy, imágenes como
    matrices, sistemas de ecuaciones reales).
 3. **Conexión con la Inteligencia Artificial**: cómo los LLMs usan matrices,
@@ -23,12 +24,15 @@ complementarias:
 
 ```
 ├── index.html            # Portada con el mapa de las 16 clases
-├── css/style.css         # Tema del curso (alto contraste, pensado para proyectar)
+├── css/style.css         # Tema del curso (colores UEES, pensado para proyectar)
+├── css/slides.css        # Modo presentación
 ├── js/
 │   ├── common.js         # Metadatos de las 16 clases + configuración del repo
+│   ├── slides.js         # Motor de slides (teclado, progreso, táctil)
 │   ├── quiz.js           # Motor de quizzes autocalificados
 │   └── viz/matrix-viz.js # Visualizaciones interactivas (crece clase a clase)
-├── clases/clase-01 … clase-16/
+├── clases/clase-01 … clase-16/   # Cada clase es un deck de slides
+├── assets/               # Logos UEES
 └── notebooks/            # Notebooks de Google Colab (uno por clase práctica)
 ```
 

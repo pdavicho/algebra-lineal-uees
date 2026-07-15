@@ -10,12 +10,13 @@
   --muted: #4c5468;
   --line: #dde1ec;
 
-  --accent: #4338ca;        /* índigo: identidad del curso */
-  --accent-soft: #eef0fe;
-  --accent-ink: #3730a3;
+  /* Identidad UEES: vino institucional + verde secundario */
+  --accent: #821436;        /* vino UEES */
+  --accent-soft: #f9edf1;
+  --accent-ink: #6b1130;
 
-  --u1: #4338ca;  --u1-soft: #eef0fe;   /* Unidad 1: matrices */
-  --u2: #0f766e;  --u2-soft: #e6f7f4;   /* Unidad 2: sistemas */
+  --u1: #821436;  --u1-soft: #f9edf1;   /* Unidad 1: matrices */
+  --u2: #055229;  --u2-soft: #e8f4ec;   /* Unidad 2: sistemas */
   --u3: #b45309;  --u3-soft: #fdf3e3;   /* Unidad 3: espacios vectoriales */
 
   --ok: #15803d;   --ok-soft: #e9f7ee;
@@ -85,17 +86,15 @@ main.wrap { padding-bottom: 4rem; }
   white-space: nowrap;
 }
 
-.brand .logo {
-  display: grid;
-  place-items: center;
-  width: 2.1rem;
-  height: 2.1rem;
-  border-radius: 9px;
-  background: var(--accent);
-  color: #fff;
-  font-family: var(--mono);
-  font-size: 1rem;
-  font-weight: 700;
+.brand .logo-img {
+  height: 2.3rem;
+  width: auto;
+}
+
+.brand .brand-sep {
+  width: 1px;
+  height: 1.8rem;
+  background: var(--line);
 }
 
 .brand small {
@@ -258,7 +257,7 @@ main.wrap { padding-bottom: 4rem; }
 }
 
 .chip.teoria   { background: var(--accent-soft); color: var(--accent-ink); }
-.chip.practica { background: #e6f7f4; color: #0f766e; }
+.chip.practica { background: #e8f4ec; color: #055229; }
 .chip.u1 { background: var(--u1-soft); color: var(--u1); }
 .chip.u2 { background: var(--u2-soft); color: var(--u2); }
 .chip.u3 { background: var(--u3-soft); color: var(--u3); }
@@ -500,7 +499,7 @@ select, input[type="number"] {
 .matrix input.cell:focus { outline: 2.5px solid var(--accent); border-color: transparent; }
 
 .matrix .cell.hl-row  { background: var(--accent-soft); color: var(--accent-ink); }
-.matrix .cell.hl-col  { background: #e6f7f4; color: #0f766e; }
+.matrix .cell.hl-col  { background: #e8f4ec; color: #055229; }
 .matrix .cell.hl-out  { background: var(--u3-soft); color: var(--u3); transform: scale(1.08); }
 .matrix .cell.done    { background: var(--ok-soft); color: var(--ok); }
 

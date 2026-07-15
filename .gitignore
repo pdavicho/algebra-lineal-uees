@@ -1,3 +1,6 @@
+# Guiones docentes: material privado del profesor, NO se publica
+guiones/
+
 # Python / Jupyter
 __pycache__/
 .ipynb_checkpoints/

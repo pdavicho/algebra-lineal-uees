@@ -164,7 +164,7 @@ function initPixelDemo(rootId) {
 
     if (hover) {
       const [i, j] = hover;
-      ctx.strokeStyle = "#4338ca";
+      ctx.strokeStyle = "#821436";
       ctx.lineWidth = 3;
       ctx.strokeRect(j * CELL + 1.5, i * CELL + 1.5, CELL - 3, CELL - 3);
     }

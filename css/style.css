@@ -550,6 +550,16 @@ select, input[type="number"] {
 
 /* ---------- quiz ---------- */
 
+.quiz-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: .8rem 0 .2rem;
+}
+
+.quiz-pager .quiz-pos { color: var(--muted); font-size: .92rem; }
+
 .quiz-q {
   background: var(--surface);
   border: 1px solid var(--line);

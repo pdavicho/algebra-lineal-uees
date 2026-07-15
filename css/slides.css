@@ -19,8 +19,8 @@ body.slides-mode {
   position: absolute;
   inset: 0;
   display: none;
-  padding: 4.2rem 5vw 4.5rem;
-  overflow-y: auto;
+  padding: 3.6rem 4.5vw 3.9rem;
+  overflow: hidden;   /* nada se desborda: el contenido se auto-escala (slides.js) */
 }
 
 .slide.active {
@@ -45,6 +45,7 @@ body.slides-mode {
   width: 100%;
   max-width: 66rem;
   margin: auto;   /* centra vertical y horizontalmente el contenido */
+  transform-origin: center center;  /* el auto-escalado reduce hacia el centro */
 }
 
 /* encabezado de slide */
@@ -63,29 +64,55 @@ body.slides-mode {
 }
 
 .slide h2.slide-title {
-  font-size: clamp(1.7rem, 3.6vw, 2.6rem);
+  font-size: clamp(1.35rem, 4.6vh, 2.5rem);
   line-height: 1.15;
   letter-spacing: -.02em;
-  margin: 0 0 1.1rem;
-  padding-bottom: .55rem;
+  margin: 0 0 .9rem;
+  padding-bottom: .5rem;
   border-bottom: 4px solid var(--accent);
   display: inline-block;
 }
 
-.slide p, .slide li { font-size: 1.12rem; }
-.slide .hint, .slide .dim-tag { font-size: .92rem; }
+/* Tipografía fluida: escala con la altura de la pantalla para que quepa todo. */
+.slide p, .slide li { font-size: clamp(.92rem, 2.4vh, 1.12rem); }
+.slide li { margin: .3vh 0; }
+.slide .hint, .slide .dim-tag { font-size: clamp(.78rem, 1.9vh, .92rem); }
+
+/* Componentes más compactos dentro de los slides */
+body.slides-mode .demo { padding: .9rem 1.2rem 1rem; margin: 1.1vh 0; }
+body.slides-mode .demo-title { margin-bottom: .6rem; }
+body.slides-mode .card { padding: .9rem 1.2rem; margin: 1.1vh 0; }
+body.slides-mode .callout { padding: .7rem 1.1rem; margin: 1.1vh 0; }
+body.slides-mode .matrix-wrap { gap: 1rem; margin: .7rem 0; }
+body.slides-mode .controls { margin: .55rem 0; }
+body.slides-mode .step-caption { margin-top: .6rem; min-height: 2.1rem; }
+body.slides-mode table.simple th, body.slides-mode table.simple td { padding: .55vh .8rem; }
+
+/* Las demos con canvas nunca exceden la mitad de la pantalla */
+body.slides-mode .pixel-stage canvas {
+  max-height: 44vh;
+  width: auto;
+}
+
+/* Quiz compacto dentro del slide */
+body.slides-mode .quiz-q { padding: .9rem 1.2rem; margin: .6rem 0; }
+body.slides-mode .quiz-q .opts { gap: .45vh; }
+body.slides-mode .quiz-q .opt { padding: .5vh .8rem; }
+body.slides-mode .quiz-result { margin: .7rem 0; padding: .8rem 1.2rem; }
+body.slides-mode .quiz-result .score { font-size: clamp(1.4rem, 3.5vh, 2rem); }
+body.slides-mode .quiz-result p { margin: .3rem 0; }
 
 /* slide de portada de la clase */
 
 .slide.portada { text-align: center; }
 
 .slide.portada .logo-uees {
-  height: 4.2rem;
-  margin-bottom: 1.6rem;
+  height: clamp(2.4rem, 7.5vh, 4.2rem);
+  margin-bottom: clamp(.6rem, 2.5vh, 1.6rem);
 }
 
 .slide.portada h1 {
-  font-size: clamp(2.3rem, 5.5vw, 3.7rem);
+  font-size: clamp(1.9rem, 8vh, 3.7rem);
   line-height: 1.12;
   letter-spacing: -.02em;
   margin: .4rem auto .8rem;
@@ -110,7 +137,7 @@ body.slides-mode {
 }
 
 .slide.portada .start-hint {
-  margin-top: 2.6rem;
+  margin-top: clamp(.9rem, 4vh, 2.6rem);
   color: var(--muted);
   font-size: .95rem;
 }
@@ -144,13 +171,13 @@ body.slides-mode {
 
 .big-math {
   text-align: center;
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 2.7vh, 1.25rem);
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 1.4rem 1.6rem;
-  margin: 1.4rem 0;
+  padding: clamp(.7rem, 2vh, 1.4rem) 1.5rem;
+  margin: 1.4vh 0;
 }
 
 /* tarjetas de tipos de matrices */
@@ -166,7 +193,7 @@ body.slides-mode {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: .9rem 1rem;
+  padding: clamp(.5rem, 1.6vh, .9rem) 1rem;
   text-align: center;
 }
 

@@ -16,6 +16,40 @@ function initDeck(opts = {}) {
   const total = slides.length;
   let current = -1;
 
+  /* ---------- ajuste adaptativo: todo el slide dentro de la pantalla ----------
+     Si el contenido excede el área visible, se reduce con transform: scale()
+     manteniéndolo centrado. Se recalcula al cambiar de slide, al redimensionar
+     la ventana y cuando el contenido cambia de tamaño (demos interactivas). */
+
+  function fitSlide(slide) {
+    const inner = slide.querySelector(".slide-inner");
+    if (!inner) return;
+    inner.style.transform = "none";
+    const cs = getComputedStyle(slide);
+    const padTop = parseFloat(cs.paddingTop);
+    const availH = slide.clientHeight - padTop - parseFloat(cs.paddingBottom);
+    const availW = slide.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const scale = Math.min(1, availH / inner.offsetHeight, availW / inner.offsetWidth);
+    if (scale >= 1) return;
+
+    inner.style.transform = `scale(${scale})`;
+    // Cuando el contenido excede el área, flexbox lo ancla arriba en vez de
+    // centrarlo; se compensa con una traslación para centrar el bloque escalado.
+    const sr = slide.getBoundingClientRect();
+    const ir = inner.getBoundingClientRect();
+    const dy = (sr.top + padTop + availH / 2) - (ir.top + ir.height / 2);
+    if (Math.abs(dy) > 0.5) inner.style.transform = `translateY(${dy}px) scale(${scale})`;
+  }
+
+  const refit = () => { if (current >= 0) fitSlide(slides[current]); };
+  window.addEventListener("resize", refit);
+
+  const ro = new ResizeObserver(refit);
+  slides.forEach((s) => {
+    const inner = s.querySelector(".slide-inner");
+    if (inner) ro.observe(inner);
+  });
+
   /* ---------- chrome fijo ---------- */
 
   const brand = document.createElement("a");
@@ -60,6 +94,10 @@ function initDeck(opts = {}) {
     slide.classList.add("active");
     slide.scrollTop = 0;
     current = n;
+
+    // Ajuste inmediato (no usar rAF: en pestañas ocultas Chrome lo pausa
+    // y el slide quedaría sin escalar hasta volver a ser visible).
+    fitSlide(slide);
 
     counter.textContent = `${n + 1} / ${total}`;
     progress.style.width = `${((n + 1) / total) * 100}%`;
@@ -109,7 +147,11 @@ function initDeck(opts = {}) {
     touchX = null;
   }, { passive: true });
 
-  // Posición inicial desde el hash (#7 → slide 7).
-  const fromHash = parseInt(location.hash.slice(1), 10);
-  goTo(Number.isFinite(fromHash) ? fromHash - 1 : 0);
+  // Posición inicial desde el hash (#7 → slide 7), y saltos si el hash cambia.
+  function goToHash() {
+    const fromHash = parseInt(location.hash.slice(1), 10);
+    goTo(Number.isFinite(fromHash) ? fromHash - 1 : 0);
+  }
+  window.addEventListener("hashchange", goToHash);
+  goToHash();
 }

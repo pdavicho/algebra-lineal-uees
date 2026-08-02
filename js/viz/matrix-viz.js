@@ -933,3 +933,224 @@ function initInverseGaussJordan(rootId) {
 
   build();
 }
+
+/* =========================================================================
+   DEMO 9 — Método de Gauss clásico: eliminación hacia adelante + sustitución
+   hacia atrás como fase separada (a diferencia de Gauss-Jordan de la Demo 6,
+   aquí NO se limpia arriba del pivote — se detiene en la forma escalonada y
+   despeja "hacia arriba" en un segundo momento, mostrando el ahorro de
+   operaciones frente a Gauss-Jordan).
+   ========================================================================= */
+
+/** Como planGaussJordan, pero solo elimina POR DEBAJO del pivote (nunca arriba):
+    esa es la única diferencia mecánica entre Gauss y Gauss-Jordan. */
+function planGaussForward(M0) {
+  const M = M0.map((f) => f.slice());
+  const rows = M.length, cols = M[0].length;
+  const tasks = [];
+
+  for (let col = 0; col < rows; col++) {
+    let piv = col;
+    for (let r = col + 1; r < rows; r++) {
+      if (Math.abs(M[r][col]) > Math.abs(M[piv][col])) piv = r;
+    }
+    if (Math.abs(M[piv][col]) < 1e-9) continue;
+
+    if (piv !== col) {
+      [M[col], M[piv]] = [M[piv], M[col]];
+      tasks.push({ type: "swap", a: col, b: piv, snapshot: M.map((f) => f.slice()) });
+    }
+
+    const pivVal = M[col][col];
+    if (Math.abs(pivVal - 1) > 1e-9) {
+      for (let j = 0; j < cols; j++) M[col][j] = M[col][j] / pivVal;
+      tasks.push({ type: "norm", row: col, pivVal, snapshot: M.map((f) => f.slice()) });
+    }
+
+    for (let r = col + 1; r < rows; r++) {   // <- SOLO debajo (la diferencia con Gauss-Jordan)
+      const factor = M[r][col];
+      if (Math.abs(factor) < 1e-9) continue;
+      for (let j = 0; j < cols; j++) M[r][j] = M[r][j] - factor * M[col][j];
+      tasks.push({ type: "elim", target: r, source: col, factor, snapshot: M.map((f) => f.slice()) });
+    }
+  }
+  return { tasks, final: M };
+}
+
+function initGaussForward(rootId, customMatrix, varNames) {
+  const root = document.getElementById(rootId);
+  if (!root) return;
+
+  const DEFAULT = customMatrix || [[1, 0, 1, 5], [2, 1, 0, 3], [0, 1, 1, 2]];
+  const ROWS = DEFAULT.length, COLS = DEFAULT[0].length;
+  const VARS = varNames || ["x", "y", "z", "w"];
+
+  root.innerHTML = `
+    <div class="matrix-wrap">
+      <div><div data-role="host"></div><div class="matrix-label">[ A | b ]</div></div>
+    </div>
+    <p class="step-caption" data-role="cap">Edita el sistema si quieres, o presiona "Siguiente paso".</p>
+    <div class="controls" style="justify-content:center">
+      <button class="btn" data-role="step">Siguiente paso ▸</button>
+      <button class="btn secondary" data-role="auto">▶ Automático</button>
+      <button class="btn secondary" data-role="reset">↺ Reiniciar</button>
+    </div>
+    <p class="hint">Primero elimina SOLO hacia abajo (forma escalonada) — a diferencia de la Clase 01,
+       aquí NO se limpia arriba del pivote. Al llegar a la forma escalonada, la solución se calcula con
+       sustitución hacia atrás, fila por fila desde abajo.</p>
+    <div data-role="backsub" style="display:none; margin-top:1rem">
+      <p class="step-caption" style="margin-bottom:.4rem"><b>🔽 Sustitución hacia atrás</b></p>
+      <div data-role="backsub-lines" style="font-family:Consolas,monospace; font-size:.92rem; line-height:1.9"></div>
+    </div>`;
+
+  const host = root.querySelector('[data-role="host"]');
+  const cap = root.querySelector('[data-role="cap"]');
+  const btnStep = root.querySelector('[data-role="step"]');
+  const btnAuto = root.querySelector('[data-role="auto"]');
+  const btnReset = root.querySelector('[data-role="reset"]');
+  const backsubBox = root.querySelector('[data-role="backsub"]');
+  const backsubLines = root.querySelector('[data-role="backsub-lines"]');
+
+  let grid, savedOriginal = DEFAULT.map((f) => f.slice()), tasks, taskIdx, timer = null;
+  let phase = "forward"; // "forward" | "backsub" | "done"
+  let backTasks = [], backIdx = 0, xVals = [];
+
+  function paint(M) {
+    grid.inputs.forEach((inp) => { inp.value = fmtNum(M[inp.dataset.i][inp.dataset.j]); });
+  }
+
+  function clearHighlights() {
+    grid.inputs.forEach((inp) => inp.classList.remove("hl-row", "hl-col", "hl-out"));
+  }
+
+  function onEdit() {
+    if (taskIdx !== 0 || phase !== "forward") return;
+    savedOriginal = readMatrix(grid);
+    tasks = planGaussForward(savedOriginal).tasks;
+    btnStep.disabled = tasks.length === 0;
+  }
+
+  function build() {
+    stopAuto();
+    phase = "forward";
+    backsubBox.style.display = "none";
+    backsubLines.innerHTML = "";
+    if (!grid) {
+      grid = buildAugmentedInputs(host, ROWS, COLS, DEFAULT, onEdit);
+    }
+    grid.inputs.forEach((inp) => { inp.disabled = false; });
+    paint(savedOriginal);
+    tasks = planGaussForward(savedOriginal).tasks;
+    taskIdx = 0;
+    clearHighlights();
+    btnStep.disabled = tasks.length === 0;
+    cap.innerHTML = tasks.length
+      ? `Sistema listo: ${tasks.length} operaciones hasta la forma escalonada. Presiona "Siguiente paso".`
+      : "Este sistema ya está en forma escalonada.";
+  }
+
+  function prepareBackSub(finalM) {
+    const n = ROWS;
+    xVals = Array(n).fill(null);
+    backTasks = [];
+    for (let row = n - 1; row >= 0; row--) {
+      const known = [];
+      let acc = finalM[row][COLS - 1];
+      for (let k = row + 1; k < n; k++) {
+        acc -= finalM[row][k] * xVals[k];
+        known.push(`(${fmtNum(finalM[row][k])})(${fmtNum(xVals[k])})`);
+      }
+      xVals[row] = acc;
+      backTasks.push({ row, terms: known, value: acc });
+    }
+  }
+
+  function doBackSubStep() {
+    if (backIdx >= backTasks.length) return;
+    const t = backTasks[backIdx];
+    const name = VARS[t.row] ?? `x${t.row + 1}`;
+    const line = document.createElement("div");
+    line.innerHTML = t.terms.length
+      ? `<b>${name}</b> = fila ${t.row + 1} despejada − (${t.terms.join(" + ")}) = <b>${fmtNum(t.value)}</b>`
+      : `<b>${name}</b> = fila ${t.row + 1} directo = <b>${fmtNum(t.value)}</b>`;
+    backsubLines.appendChild(line);
+    cap.innerHTML = `Sustituyendo hacia atrás: <b>${name} = ${fmtNum(t.value)}</b>`;
+    backIdx++;
+    if (backIdx >= backTasks.length) {
+      btnStep.disabled = true;
+      stopAuto();
+      phase = "done";
+      cap.innerHTML = "🎉 Solución completa por sustitución hacia atrás: " +
+        backTasks.slice().reverse().map((t) =>
+          `${VARS[t.row] ?? "x" + (t.row + 1)} = <b>${fmtNum(t.value)}</b>`
+        ).join(", ");
+    }
+  }
+
+  function doStep() {
+    if (phase === "forward") {
+      if (taskIdx >= tasks.length) return;
+      if (taskIdx === 0) grid.inputs.forEach((inp) => { inp.disabled = true; });
+      clearHighlights();
+      const t = tasks[taskIdx];
+
+      if (t.type === "swap") {
+        cap.innerHTML = `<b>F${t.a + 1} ↔ F${t.b + 1}</b> — pivoteo parcial: subimos el mayor valor absoluto.`;
+        grid.inputs.forEach((inp) => {
+          if (Number(inp.dataset.i) === t.a) inp.classList.add("hl-row");
+          if (Number(inp.dataset.i) === t.b) inp.classList.add("hl-col");
+        });
+      } else if (t.type === "norm") {
+        cap.innerHTML = `<b>F${t.row + 1} → F${t.row + 1} ÷ ${fmtNum(t.pivVal)}</b> — normalizamos el pivote a 1.`;
+        grid.inputs.forEach((inp) => { if (Number(inp.dataset.i) === t.row) inp.classList.add("hl-out"); });
+      } else {
+        cap.innerHTML = `<b>F${t.target + 1} → F${t.target + 1} − (${fmtNum(t.factor)})·F${t.source + 1}</b> — hacemos 0 SOLO debajo del pivote.`;
+        grid.inputs.forEach((inp) => {
+          if (Number(inp.dataset.i) === t.source) inp.classList.add("hl-col");
+          if (Number(inp.dataset.i) === t.target) inp.classList.add("hl-out");
+        });
+      }
+
+      paint(t.snapshot);
+      taskIdx++;
+
+      if (taskIdx >= tasks.length) {
+        clearHighlights();
+        const M = t.snapshot;
+        const hasZeroPivotRow = M.some((row) => row.slice(0, ROWS).every((v) => Math.abs(v) < 1e-6));
+        if (hasZeroPivotRow) {
+          btnStep.disabled = true;
+          stopAuto();
+          cap.innerHTML = `⚠️ Quedó una fila de ceros → el sistema NO tiene solución única (infinitas o ninguna, revisa el término independiente).`;
+          return;
+        }
+        cap.innerHTML = `✅ Forma escalonada alcanzada — ahora sustitución hacia atrás. Presiona "Siguiente paso".`;
+        phase = "backsub";
+        backsubBox.style.display = "block";
+        prepareBackSub(M);
+        backIdx = 0;
+      }
+    } else if (phase === "backsub") {
+      doBackSubStep();
+    }
+  }
+
+  function stopAuto() {
+    if (timer) { clearInterval(timer); timer = null; btnAuto.textContent = "▶ Automático"; }
+  }
+
+  btnStep.addEventListener("click", doStep);
+  btnReset.addEventListener("click", build);
+  btnAuto.addEventListener("click", () => {
+    if (timer) { stopAuto(); return; }
+    if (btnStep.disabled && phase !== "backsub") build();
+    btnAuto.textContent = "⏸ Pausar";
+    doStep();
+    timer = setInterval(() => {
+      if (btnStep.disabled) stopAuto();
+      else doStep();
+    }, 1800);
+  });
+
+  build();
+}

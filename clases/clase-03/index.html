@@ -7,11 +7,15 @@
   <link rel="icon" href="../../assets/logo-uees.png">
   <link rel="stylesheet" href="../../css/style.css">
   <link rel="stylesheet" href="../../css/slides.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
 </head>
 <body>
 
 <div class="deck">
 
+  <!-- ============ 1 · PORTADA ============ -->
   <section class="slide portada">
     <div class="slide-inner">
       <img class="logo-uees" src="../../assets/logo-uees.png" alt="Universidad Espíritu Santo">
@@ -19,31 +23,403 @@
         <span class="chip semana">Clase 03 · Semana 3</span>
         <span class="chip u2">Unidad 2 · Sistemas de ecuaciones lineales</span>
       </div>
-      <h1>Sistemas de ecuaciones: Ax = b y el método de Gauss</h1>
-      <p class="lead">Representar un sistema como matriz aumentada y resolverlo con Gauss — la misma operación detrás de una capa lineal de una red neuronal.</p>
-      <div class="objetivos" style="text-align:left; max-width:36rem; margin:1.6rem auto 0">
-        <h2>Temario (según el sílabo)</h2>
-        <ul>
-        <li>2.1 Representación matricial de un sistema</li>
-        <li>2.2 Resolución por el método de Gauss</li>
-        </ul>
-        <h2>Reto de la semana</h2>
-        <ul>
-        <li>Reto Colab · "Encontrando los pesos exactos": Ax=b como mini-perceptrón con restricciones exactas, eliminación de Gauss en NumPy, verificación con un forward pass.</li>
-        </ul>
+      <h1>Ax = b y el método de <span class="hl">Gauss</span></h1>
+      <p class="lead">
+        Cómo calibrar, a mano y en código, la neurona artificial más simple que existe —
+        con pesos exactos, no aproximados.
+      </p>
+      <p class="start-hint">Usa <kbd>←</kbd> <kbd>→</kbd> o los botones para navegar · <kbd>F</kbd> pantalla completa</p>
+    </div>
+  </section>
+
+  <!-- ============ 2 · OBJETIVOS ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Hoy vas a lograr</span>
+      <h2 class="slide-title">Objetivos de la clase</h2>
+      <ul>
+        <li><b>Representar</b> cualquier sistema de ecuaciones como $Ax=b$ a partir de restricciones.</li>
+        <li><b>Resolver</b> con el método de Gauss: eliminación hacia adelante + sustitución hacia atrás.</li>
+        <li><b>Calibrar</b> un mini-perceptrón con pesos exactos — la misma operación de la atención de un LLM.</li>
+        <li><b>Verificar</b> la solución con un forward pass.</li>
+      </ul>
+      <div class="callout">
+        <p class="callout-title">📌 En el sílabo</p>
+        <p>Temas 2.1 y 2.2 de la Unidad 2 · Resultado de aprendizaje RDA2.</p>
       </div>
-      <p class="start-hint">🚧 Presentación en construcción — seguirá el formato interactivo de la
-        <a href="../clase-01/index.html">Clase 01</a>.</p>
-      <div class="meta-row" style="margin-top:1.2rem">
-        <a class="colab-btn" href="../clase-02/index.html" style="background:var(--accent);color:#fff">← Clase anterior</a>
-        <a class="colab-btn" href="../clase-04/index.html" style="background:var(--accent);color:#fff">Clase siguiente →</a>
+      <div class="callout ia">
+        <p class="callout-title">🔗 Reto de enlace de la semana pasada</p>
+        <p>¿Resolviste $2x+y=8,\ x-y=1$? La respuesta era $x=3,\ y=2$. Hoy ves un método más directo
+        que la inversa para sistemas cuadrados.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3 · GANCHO ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Para empezar</span>
+      <h2 class="slide-title">¿Qué es un mini-perceptrón?</h2>
+      <p>
+        La neurona artificial más simple: recibe entradas, cada una multiplicada por un
+        <b>peso</b> que mide su importancia, las suma, y agrega un <b>sesgo</b> fijo.
+      </p>
+      <div class="big-math">$$\text{salida} = w_1x_1 + w_2x_2 + \cdots + w_nx_n + b$$</div>
+      <div class="callout">
+        <p class="callout-title">💬 La pregunta de hoy</p>
+        <p>Si exijo que, para ciertas entradas específicas, la salida sea EXACTAMENTE un valor dado —
+        ¿cómo encuentro los pesos que lo logran?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4 · REPRESENTACIÓN MATRICIAL GENERAL ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Tema 2.1</span>
+      <h2 class="slide-title">Representación matricial de un sistema</h2>
+      <p>
+        Cualquier sistema de $n$ ecuaciones con $n$ incógnitas es $Ax=b$. Lo nuevo hoy: traducir un
+        enunciado con restricciones a esta forma — cada restricción se vuelve una <b>fila</b> de $A$
+        (coeficientes) y una entrada de $b$ (el resultado exigido).
+      </p>
+      <div class="big-math">$$\text{restricción} \;\longrightarrow\; \text{fila de } A \;+\; \text{entrada de } b$$</div>
+    </div>
+  </section>
+
+  <!-- ============ 5 · DE RESTRICCIONES A Ax=b ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Manos a la obra</span>
+      <h2 class="slide-title">De restricciones exactas a Ax = b</h2>
+      <p>Un mini-perceptrón con 2 entradas + sesgo. Tres restricciones exactas:</p>
+      <table class="simple">
+        <tr><th>$(x_1, x_2)$</th><th>salida exigida</th></tr>
+        <tr><td>$(1, 2)$</td><td>$9$</td></tr>
+        <tr><td>$(2, 0)$</td><td>$5$</td></tr>
+        <tr><td>$(0, 3)$</td><td>$10$</td></tr>
+      </table>
+      <div class="big-math">
+        $$\begin{pmatrix}1&2&1\\2&0&1\\0&3&1\end{pmatrix}\begin{pmatrix}w_1\\w_2\\b\end{pmatrix}=\begin{pmatrix}9\\5\\10\end{pmatrix}$$
+      </div>
+      <p class="hint">Cada fila: coeficiente de $w_1$, de $w_2$, del sesgo (siempre 1) — y del otro lado, el resultado exigido.</p>
+    </div>
+  </section>
+
+  <!-- ============ 6 · EL MÉTODO DE GAUSS ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Tema 2.2</span>
+      <h2 class="slide-title">El método de Gauss: eliminación hacia adelante</h2>
+      <div class="cols">
+        <div class="card">
+          <p style="margin:0"><b>Gauss-Jordan</b> (Clase 01): hace ceros ARRIBA y ABAJO de cada pivote
+          — forma escalonada reducida, solución directa.</p>
+        </div>
+        <div class="card" style="border-color:var(--accent); border-width:2px">
+          <p style="margin:0"><b>Gauss</b> (hoy): hace ceros SOLO ABAJO de cada pivote — forma
+          escalonada. Falta un paso: sustitución hacia atrás.</p>
+        </div>
+      </div>
+      <p class="hint">Mismo pivoteo parcial de siempre: sube la fila con mayor valor absoluto antes de normalizar.</p>
+    </div>
+  </section>
+
+  <!-- ============ 7 · DEMO GAUSS PASO A PASO ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Manos a la obra</span>
+      <h2 class="slide-title">Demo: Gauss clásico, paso a paso</h2>
+      <p>Elimina hacia abajo hasta la forma escalonada — y luego sustituye hacia atrás.</p>
+      <div class="demo">
+        <div class="demo-title">Demo · Eliminación de Gauss + sustitución hacia atrás</div>
+        <div id="demo-gauss-forward"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 8 · SUSTITUCIÓN HACIA ATRÁS ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Tema 2.2</span>
+      <h2 class="slide-title">Sustitución hacia atrás</h2>
+      <p>
+        La forma escalonada no tiene la solución lista — hay que "desenrollarla" desde abajo. La
+        última fila ya tiene una sola incógnita: se despeja directo. Con ese valor, la siguiente fila
+        tiene una sola incógnita nueva.
+      </p>
+      <div class="big-math">$$z=3 \;\Rightarrow\; y=-7+2(3)=-1 \;\Rightarrow\; x=5-3=2$$</div>
+      <p class="hint">Tres líneas, sin volver a tocar la matriz — mucho más barato que seguir reduciendo con Gauss-Jordan.</p>
+    </div>
+  </section>
+
+  <!-- ============ 9 · POR QUÉ GAUSS Y NO GAUSS-JORDAN ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">El porqué, no solo el cómo</span>
+      <h2 class="slide-title">¿Por qué Gauss y no Gauss-Jordan aquí?</h2>
+      <div class="callout ia">
+        <p class="callout-title">📊 Costo computacional real</p>
+        <p>
+          Gauss: aproximadamente $\frac{2}{3}n^3$ operaciones. Gauss-Jordan: aproximadamente $n^3$
+          — <b>~50% más</b> para resolver el mismo sistema. Las librerías reales (NumPy, MATLAB,
+          LAPACK) resuelven con variantes de Gauss; Gauss-Jordan se reserva para cuando necesitas la
+          inversa completa (Clase 02).
+        </p>
+      </div>
+      <p class="hint">Para $n=100$: Gauss ≈ 667,000 operaciones · Gauss-Jordan ≈ 1,000,000 — 333,000 de más.</p>
+    </div>
+  </section>
+
+  <!-- ============ 10 · HISTORIA DEL PERCEPTRÓN ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">De dónde sale la idea</span>
+      <h2 class="slide-title">1958: el perceptrón de Rosenblatt</h2>
+      <div class="callout ia">
+        <p class="callout-title">📜 Frank Rosenblatt, 1958</p>
+        <p>
+          Inventó el perceptrón — literalmente la neurona que acaban de describir — y demostró
+          matemáticamente que su algoritmo de ajuste de pesos siempre converge cuando el problema lo
+          permite. No es una simplificación pedagógica: es el punto de partida histórico real de todas
+          las redes neuronales de hoy.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 11 · LIVE CODING: CALIBRANDO EL MINI-PERCEPTRÓN ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Live coding en vivo</span>
+      <h2 class="slide-title">Calibrando el mini-perceptrón</h2>
+      <p>El mismo sistema del slide 5 — resolvámoslo juntos con Gauss.</p>
+      <div class="demo">
+        <div class="demo-title">Demo · Mini-perceptrón: eliminación de Gauss + sustitución</div>
+        <div id="demo-gauss-perceptron"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 12 · FORWARD PASS ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Verificación</span>
+      <h2 class="slide-title">Verificación con forward pass</h2>
+      <p>
+        Un <b>forward pass</b> es evaluar el modelo hacia adelante: meter las entradas originales,
+        multiplicar por los pesos encontrados, y ver si sale lo exigido.
+      </p>
+      <div class="big-math">$$w_1=2,\ w_2=3,\ b=1 \quad\Rightarrow\quad 2(1)+3(2)+1=9\ \checkmark$$</div>
+      <div class="callout">
+        <p class="callout-title">✅ Criterio 3 de la rúbrica</p>
+        <p>Repite con las otras dos entradas — las tres deben coincidir EXACTO con lo exigido.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 13 · CONEXIÓN CON IA ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Conexión con la IA</span>
+      <h2 class="slide-title">La misma operación vive en la atención</h2>
+      <div class="callout ia">
+        <p class="callout-title">🤖 Vaswani et al. (2017), "Attention Is All You Need"</p>
+        <p>
+          Las matrices de Consulta, Llave y Valor de un Transformer se calculan exactamente así:
+          $Q=XW^Q$, $K=XW^K$, $V=XW^V$ — entrada multiplicada por una matriz de pesos. La MISMA
+          operación de hoy, con matrices de miles de columnas en vez de dos.
+        </p>
+      </div>
+      <p class="hint">Formalizarás esto con nombre propio —transformación lineal— en la Clase 07.</p>
+    </div>
+  </section>
+
+  <!-- ============ 14 · CUANDO EL SISTEMA NO ES CUADRADO ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Conectando con la Clase 02</span>
+      <h2 class="slide-title">Cuando el sistema NO es cuadrado</h2>
+      <div class="cols">
+        <div class="card" style="border-color:var(--accent); border-width:2px">
+          <p style="margin:0"><b>Hoy:</b> tantas restricciones como pesos — sistema cuadrado,
+          <b>solución exacta</b> con Gauss.</p>
+        </div>
+        <div class="card">
+          <p style="margin:0"><b>Clase 02:</b> más observaciones que pesos — sistema
+          sobre-determinado, <b>sin solución exacta</b>, se ajusta con mínimos cuadrados ($X^\top X$).</p>
+        </div>
+      </div>
+      <p class="hint">Mismo tipo de problema, dos situaciones distintas, dos herramientas distintas.</p>
+    </div>
+  </section>
+
+  <!-- ============ 15 · QUIZ ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Comprueba lo aprendido</span>
+      <h2 class="slide-title">Quiz de la clase</h2>
+      <p>Mismo formato de las evaluaciones de Blackboard. Responde y presiona <b>Calificar</b>.</p>
+      <div id="quiz-clase03"></div>
+    </div>
+  </section>
+
+  <!-- ============ 16 · COLAB ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">A programar 🐍</span>
+      <h2 class="slide-title">Práctica en Google Colab</h2>
+      <p>
+        El notebook de hoy programa lo mismo: plantear $Ax=b$ desde restricciones, resolver con
+        eliminación de Gauss en NumPy, y verificar con un forward pass.
+      </p>
+      <div class="colab-box">
+        <span class="icon">🐍</span>
+        <div class="txt">
+          <p><b>Notebook · Clase 03:</b> Ax=b y el mini-perceptrón.</p>
+          <p>Se abre y se ejecuta en tu navegador con tu cuenta de Google. Nada que instalar.</p>
+        </div>
+        <a class="colab-btn" data-notebook="notebooks/clase-03.ipynb" href="#">▶ Abrir en Colab</a>
+      </div>
+      <div class="callout ia">
+        <p class="callout-title">🔗 Antes de la próxima clase</p>
+        <p>
+          La Clase 04 ve la Regla de Cramer: un tercer método que resuelve sistemas usando SOLO
+          determinantes. Resuelve $\begin{cases}3x+2y=12\\x-y=1\end{cases}$ con cualquier método, y
+          calcula también $\det(A)$. Guarda ambos resultados.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 17 · CIERRE ============ -->
+  <section class="slide cierre">
+    <div class="slide-inner">
+      <img class="logo-uees" src="../../assets/logo-uees.png" alt="UEES" style="height:3.2rem;margin-bottom:1rem">
+      <h2 class="slide-title" style="border:none">Lo que te llevas hoy</h2>
+      <div class="type-grid" style="text-align:left">
+        <div class="type-card"><div class="t-name">✔ Ax=b</div><p class="hint">cualquier conjunto de restricciones exactas se traduce a esta forma</p></div>
+        <div class="type-card"><div class="t-name">✔ Gauss</div><p class="hint">eliminación hacia adelante + sustitución hacia atrás — ~50% más barato que Gauss-Jordan</p></div>
+        <div class="type-card"><div class="t-name">✔ Mini-perceptrón</div><p class="hint">pesos exactos, calibrados a mano — la misma operación de la atención Q/K/V</p></div>
+        <div class="type-card"><div class="t-name">✔ Forward pass</div><p class="hint">verificar multiplicando entradas × pesos y comparando con lo exigido</p></div>
+      </div>
+      <p style="margin-top:2rem">
+        <b>Próxima clase:</b> Regla de Cramer, repaso integrador y examen parcial. 📝
+      </p>
+      <div class="meta-row" style="margin-top:1rem">
+        <a class="colab-btn" href="../clase-02/index.html">← Clase 02</a>
+        <a class="colab-btn" href="../clase-04/index.html" style="background:var(--accent);color:#fff">Ir a la Clase 04 →</a>
       </div>
     </div>
   </section>
 
 </div>
 
+<script src="../../js/common.js"></script>
+<script src="../../js/quiz.js"></script>
+<script src="../../js/viz/matrix-viz.js"></script>
 <script src="../../js/slides.js"></script>
-<script>initDeck({ label: "Clase 03 · Álgebra Lineal UMAT205" });</script>
+<script>
+  // Demos interactivas
+  initGaussForward("demo-gauss-forward");
+  initGaussForward("demo-gauss-perceptron", [[1, 2, 1, 9], [2, 0, 1, 5], [0, 3, 1, 10]], ["w1", "w2", "b"]);
+
+  // Quiz (formato Blackboard: opción múltiple + proceso)
+  const PREGUNTAS = [
+    {
+      q: "¿Cuál es la diferencia principal entre el método de Gauss y el de Gauss-Jordan?",
+      opts: [
+        "Gauss solo sirve para sistemas 2×2",
+        "Gauss hace ceros solo debajo del pivote (forma escalonada); Gauss-Jordan también arriba (forma escalonada reducida)",
+        "Gauss-Jordan no usa pivoteo parcial",
+        "Son exactamente el mismo método con otro nombre",
+      ],
+      correct: 1,
+      explain: "Gauss se detiene en la forma escalonada y requiere sustitución hacia atrás; Gauss-Jordan continúa hasta la forma escalonada reducida.",
+    },
+    {
+      q: "En la forma escalonada $\\begin{pmatrix}1&0&1&\\vert&5\\\\0&1&-2&\\vert&-7\\\\0&0&1&\\vert&3\\end{pmatrix}$, el valor de $z$ es…",
+      opts: ["5", "-7", "3", "No se puede saber todavía"],
+      correct: 2,
+      explain: "La última fila ya tiene una sola incógnita: $z=3$, directo de la última columna.",
+    },
+    {
+      q: "Con $z=3$ en la fila $y-2z=-7$, el valor de $y$ es…",
+      opts: ["-1", "-13", "13", "1"],
+      correct: 0,
+      explain: "$y = -7 + 2(3) = -7+6=-1$.",
+    },
+    {
+      q: "¿Por qué se prefiere Gauss (con sustitución hacia atrás) sobre Gauss-Jordan cuando solo se necesita la solución de un sistema?",
+      opts: [
+        "Gauss es matemáticamente más preciso",
+        "Gauss requiere aproximadamente 50% menos operaciones que Gauss-Jordan",
+        "Gauss-Jordan no funciona con pivoteo parcial",
+        "No hay ninguna diferencia práctica",
+      ],
+      correct: 1,
+      explain: "Gauss: ~2/3 n³ operaciones. Gauss-Jordan: ~n³ — aproximadamente 50% más para resolver el mismo sistema.",
+    },
+    {
+      q: "Un mini-perceptrón con 2 entradas y sesgo tiene 3 restricciones exactas. ¿Cuántas incógnitas (pesos) tiene el sistema?",
+      opts: ["2", "3", "6", "9"],
+      correct: 1,
+      explain: "2 pesos ($w_1, w_2$) + 1 sesgo ($b$) = 3 incógnitas — por eso hacen falta exactamente 3 restricciones para una solución única.",
+    },
+    {
+      q: "Con pesos $w_1=2,\\ w_2=3,\\ b=1$, el forward pass para la entrada $(x_1,x_2)=(2,0)$ es…",
+      opts: ["5", "6", "9", "10"],
+      correct: 0,
+      explain: "$2(2)+3(0)+1=4+0+1=5$.",
+    },
+    {
+      q: "¿Qué significa que el forward pass de un mini-perceptrón calibrado por Gauss coincida EXACTO con las salidas exigidas?",
+      opts: [
+        "Que los pesos están mal calculados",
+        "Que el sistema tenía infinitas soluciones",
+        "Que el sistema se resolvió correctamente — no hay error, es una solución exacta",
+        "Que hace falta repetir la eliminación de Gauss",
+      ],
+      correct: 2,
+      explain: "A diferencia de la regresión de la Clase 02 (que minimiza un error), el sistema cuadrado del mini-perceptrón tiene solución EXACTA si det(A)≠0 — el forward pass debe coincidir sin ningún error.",
+    },
+    {
+      q: "¿Cuál es la diferencia entre el sistema de hoy (mini-perceptrón) y el de la Clase 02 (regresión lineal)?",
+      opts: [
+        "No hay ninguna diferencia",
+        "Hoy el sistema es cuadrado con solución exacta; en la Clase 02 era sobre-determinado y se ajustaba por mínimos cuadrados",
+        "La Clase 02 usaba Gauss y hoy usamos la inversa",
+        "Hoy no se usan matrices",
+      ],
+      correct: 1,
+      explain: "Tantas restricciones como incógnitas (hoy) da un sistema cuadrado con solución exacta; más observaciones que incógnitas (Clase 02) da un sistema sobre-determinado que se ajusta, no se resuelve exacto.",
+    },
+    {
+      q: "¿Quién inventó el perceptrón y en qué año?",
+      opts: ["Alan Turing, 1950", "Frank Rosenblatt, 1958", "Geoffrey Hinton, 1986", "Ashish Vaswani, 2017"],
+      correct: 1,
+      explain: "Frank Rosenblatt inventó el perceptrón en 1958, con un teorema de convergencia para su algoritmo de ajuste de pesos.",
+    },
+    {
+      q: "En la arquitectura Transformer (Vaswani et al., 2017), las matrices Q, K y V se calculan como…",
+      opts: [
+        "Sumas de matrices aleatorias",
+        "Proyecciones lineales de la entrada: Q=XW^Q, K=XW^K, V=XW^V",
+        "Determinantes de la entrada",
+        "Inversas de la matriz de entrada",
+      ],
+      correct: 1,
+      explain: "Q, K y V son proyecciones lineales (entrada × matriz de pesos) — la misma operación del mini-perceptrón de hoy.",
+    },
+  ];
+
+  window.addEventListener("DOMContentLoaded", () => {
+    renderQuiz("quiz-clase03", PREGUNTAS);
+    if (window.renderMathInElement) {
+      renderMathInElement(document.body, KATEX_OPTS);
+    }
+    initDeck({ label: "Clase 03 · Ax=b y el método de Gauss · Álgebra Lineal UMAT205" });
+  });
+</script>
 </body>
 </html>

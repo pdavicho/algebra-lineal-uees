@@ -1,6 +1,13 @@
 # Guiones docentes: material privado del profesor, NO se publica
 guiones/
 
+# Material de auto-estudio del profesor (repaso, pizarra, ejercicios a mano): privado, NO se publica
+estudio/
+
+# Documentos administrativos del sílabo: privados (firma digital, datos del docente), NO se publican
+/*.pdf
+/*.docx
+
 # Python / Jupyter
 __pycache__/
 .ipynb_checkpoints/

@@ -544,3 +544,177 @@ function initMatrixProduct(rootId) {
 
   build();
 }
+
+/* =========================================================================
+   DEMO 6 — Eliminación de Gauss-Jordan, paso a paso
+   Reduce una matriz aumentada [A|b] a su forma escalonada reducida (RREF)
+   usando pivoteo parcial, un renglón elemental por clic, hasta leer la
+   solución directamente en la última columna.
+   ========================================================================= */
+
+function fmtNum(x) {
+  if (Math.abs(x) < 1e-9) x = 0;
+  const r = Math.round(x * 10000) / 10000;
+  return Number.isInteger(r) ? String(r) : String(parseFloat(r.toFixed(2)));
+}
+
+function buildAugmentedInputs(parent, rows, cols, values, onChange) {
+  const grid = buildMatrixInputs(parent, rows, cols, values, onChange);
+  grid.inputs.forEach((inp) => {
+    if (Number(inp.dataset.j) === cols - 1) inp.classList.add("aug-sep");
+  });
+  return grid;
+}
+
+/** Simula Gauss-Jordan con pivoteo parcial sobre una copia de M y devuelve
+    la lista de operaciones elementales de fila necesarias para llegar al RREF. */
+function planGaussJordan(M0) {
+  const M = M0.map((f) => f.slice());
+  const rows = M.length, cols = M[0].length;
+  const tasks = [];
+
+  for (let col = 0; col < rows; col++) {
+    let piv = col;
+    for (let r = col + 1; r < rows; r++) {
+      if (Math.abs(M[r][col]) > Math.abs(M[piv][col])) piv = r;
+    }
+    if (Math.abs(M[piv][col]) < 1e-9) continue; // columna sin pivote (sistema singular)
+
+    if (piv !== col) {
+      [M[col], M[piv]] = [M[piv], M[col]];
+      tasks.push({ type: "swap", a: col, b: piv, snapshot: M.map((f) => f.slice()) });
+    }
+
+    const pivVal = M[col][col];
+    if (Math.abs(pivVal - 1) > 1e-9) {
+      for (let j = 0; j < cols; j++) M[col][j] = M[col][j] / pivVal;
+      tasks.push({ type: "norm", row: col, pivVal, snapshot: M.map((f) => f.slice()) });
+    }
+
+    for (let r = 0; r < rows; r++) {
+      if (r === col) continue;
+      const factor = M[r][col];
+      if (Math.abs(factor) < 1e-9) continue;
+      for (let j = 0; j < cols; j++) M[r][j] = M[r][j] - factor * M[col][j];
+      tasks.push({ type: "elim", target: r, source: col, factor, snapshot: M.map((f) => f.slice()) });
+    }
+  }
+  return { tasks, final: M };
+}
+
+function initGaussJordan(rootId) {
+  const root = document.getElementById(rootId);
+  if (!root) return;
+
+  const DEFAULT = [[2, 1, -1, 8], [-3, -1, 2, -11], [-2, 1, 2, -3]];
+  const ROWS = 3, COLS = 4;
+
+  root.innerHTML = `
+    <div class="matrix-wrap">
+      <div><div data-role="host"></div><div class="matrix-label">[ A | b ]</div></div>
+    </div>
+    <p class="step-caption" data-role="cap">Edita el sistema si quieres, o presiona "Siguiente paso" para reducirlo.</p>
+    <div class="controls" style="justify-content:center">
+      <button class="btn" data-role="step">Siguiente paso ▸</button>
+      <button class="btn secondary" data-role="auto">▶ Automático</button>
+      <button class="btn secondary" data-role="reset">↺ Reiniciar</button>
+    </div>
+    <p class="hint">Cada clic aplica <b>una</b> operación elemental de fila (intercambiar, normalizar el pivote
+       o eliminar) hasta llegar a la forma escalonada reducida — ahí la solución se lee directo en la última columna.</p>`;
+
+  const host = root.querySelector('[data-role="host"]');
+  const cap = root.querySelector('[data-role="cap"]');
+  const btnStep = root.querySelector('[data-role="step"]');
+  const btnAuto = root.querySelector('[data-role="auto"]');
+  const btnReset = root.querySelector('[data-role="reset"]');
+
+  let grid, savedOriginal = DEFAULT.map((f) => f.slice()), tasks, taskIdx, timer = null;
+
+  function paint(M) {
+    grid.inputs.forEach((inp) => {
+      inp.value = fmtNum(M[inp.dataset.i][inp.dataset.j]);
+    });
+  }
+
+  function clearHighlights() {
+    grid.inputs.forEach((inp) => inp.classList.remove("hl-row", "hl-col", "hl-out"));
+  }
+
+  /** El usuario terminó de editar una celda: esos valores pasan a ser el sistema guardado. */
+  function onEdit() {
+    if (taskIdx !== 0) return; // no debería poder pasar (inputs deshabilitados), por seguridad
+    savedOriginal = readMatrix(grid);
+    tasks = planGaussJordan(savedOriginal).tasks;
+    btnStep.disabled = tasks.length === 0;
+  }
+
+  /** (Re)pinta el sistema guardado y prepara el plan de pasos desde cero. */
+  function build() {
+    stopAuto();
+    if (!grid) {
+      grid = buildAugmentedInputs(host, ROWS, COLS, DEFAULT, onEdit);
+    }
+    grid.inputs.forEach((inp) => { inp.disabled = false; });
+    paint(savedOriginal);
+    tasks = planGaussJordan(savedOriginal).tasks;
+    taskIdx = 0;
+    clearHighlights();
+    btnStep.disabled = tasks.length === 0;
+    cap.innerHTML = tasks.length
+      ? `Sistema listo: ${tasks.length} operaciones de fila hasta el RREF. Presiona "Siguiente paso".`
+      : "Este sistema ya está en forma escalonada reducida.";
+  }
+
+  function doStep() {
+    if (taskIdx >= tasks.length) return;
+    if (taskIdx === 0) grid.inputs.forEach((inp) => { inp.disabled = true; }); // congela la edición mientras se reduce
+    clearHighlights();
+    const t = tasks[taskIdx];
+
+    if (t.type === "swap") {
+      cap.innerHTML = `<b>F${t.a + 1} ↔ F${t.b + 1}</b> — llevamos el mayor valor absoluto a la fila del pivote (pivoteo parcial).`;
+      grid.inputs.forEach((inp) => {
+        if (Number(inp.dataset.i) === t.a) inp.classList.add("hl-row");
+        if (Number(inp.dataset.i) === t.b) inp.classList.add("hl-col");
+      });
+    } else if (t.type === "norm") {
+      cap.innerHTML = `<b>F${t.row + 1} → F${t.row + 1} ÷ ${fmtNum(t.pivVal)}</b> — el pivote de la fila ${t.row + 1} queda en 1.`;
+      grid.inputs.forEach((inp) => { if (Number(inp.dataset.i) === t.row) inp.classList.add("hl-out"); });
+    } else {
+      cap.innerHTML = `<b>F${t.target + 1} → F${t.target + 1} − (${fmtNum(t.factor)})·F${t.source + 1}</b> — hacemos 0 el elemento debajo/encima del pivote.`;
+      grid.inputs.forEach((inp) => {
+        if (Number(inp.dataset.i) === t.source) inp.classList.add("hl-col");
+        if (Number(inp.dataset.i) === t.target) inp.classList.add("hl-out");
+      });
+    }
+
+    paint(t.snapshot);
+    taskIdx++;
+
+    if (taskIdx >= tasks.length) {
+      btnStep.disabled = true;
+      stopAuto();
+      const sol = t.snapshot.map((f) => f[COLS - 1]);
+      cap.innerHTML = `🎉 RREF alcanzada — solución: ` + sol.map((v, i) => `x<sub>${i + 1}</sub> = <b>${fmtNum(v)}</b>`).join(", ");
+    }
+  }
+
+  function stopAuto() {
+    if (timer) { clearInterval(timer); timer = null; btnAuto.textContent = "▶ Automático"; }
+  }
+
+  btnStep.addEventListener("click", doStep);
+  btnReset.addEventListener("click", build);
+  btnAuto.addEventListener("click", () => {
+    if (timer) { stopAuto(); return; }
+    if (btnStep.disabled) build();
+    btnAuto.textContent = "⏸ Pausar";
+    doStep();
+    timer = setInterval(() => {
+      if (btnStep.disabled) stopAuto();
+      else doStep();
+    }, 1800);
+  });
+
+  build();
+}

@@ -14,26 +14,27 @@ complementarias:
 
 ## Estructura
 
-- **16 clases** organizadas en las 3 unidades del sílabo (las 8 sesiones sincrónicas
-  de 2 h se expanden en pares teoría + práctica):
-  - **Unidad 1 · Matrices y determinantes** — clases 01–06
-  - **Unidad 2 · Sistemas de ecuaciones lineales** — clases 07–10 (incluye simulacro del parcial)
-  - **Unidad 3 · Espacios vectoriales reales** — clases 11–16 (incluye embeddings, analogías de palabras y proyecto final)
-- Estado actual: **Clase 01 completa** (clase modelo); las clases 02–16 tienen su
+- **8 clases**, una por cada sesión sincrónica de 2 h del sílabo oficial (versión
+  final, 23-marzo-2026). Cada clase combina la teoría de la semana con su reto o
+  caso de estudio práctico:
+  - **Unidad 1 · Matrices y determinantes** — clases 01–02
+  - **Unidad 2 · Sistemas de ecuaciones lineales** — clases 03–04 (incluye examen parcial)
+  - **Unidad 3 · Espacios vectoriales reales** — clases 05–08 (incluye embeddings, PCA, atención de un Transformer, LoRA y examen final)
+- Estado actual: **Clase 01 completa** (clase modelo); las clases 02–08 tienen su
   plantilla con temario y se irán publicando.
 
 ```
-├── index.html            # Portada con el mapa de las 16 clases
+├── index.html            # Portada con el mapa de las 8 clases
 ├── css/style.css         # Tema del curso (colores UEES, pensado para proyectar)
 ├── css/slides.css        # Modo presentación
 ├── js/
-│   ├── common.js         # Metadatos de las 16 clases + configuración del repo
+│   ├── common.js         # Metadatos de las 8 clases + configuración del repo
 │   ├── slides.js         # Motor de slides (teclado, progreso, táctil)
 │   ├── quiz.js           # Motor de quizzes autocalificados
 │   └── viz/matrix-viz.js # Visualizaciones interactivas (crece clase a clase)
-├── clases/clase-01 … clase-16/   # Cada clase es un deck de slides
+├── clases/clase-01 … clase-08/   # Cada clase es un deck de slides
 ├── assets/               # Logos UEES
-└── notebooks/            # Notebooks de Google Colab (uno por clase práctica)
+└── notebooks/            # Notebooks de Google Colab (uno por clase)
 ```
 
 Sin frameworks ni pasos de build: HTML/CSS/JS puro + [KaTeX](https://katex.org) por CDN.
@@ -54,7 +55,7 @@ Los botones de Colab construyen su URL con los datos de `js/common.js`. Edita ah
 
 ```js
 const SITE_CONFIG = {
-  githubUser: "pablodavid218",        // ← tu usuario de GitHub
+  githubUser: "pdavicho",             // ← tu usuario de GitHub
   githubRepo: "algebra-lineal-uees",  // ← el nombre real del repositorio
   branch: "main",
 };
@@ -80,4 +81,5 @@ nuevas se agregan a `js/viz/` y los metadatos de cada clase viven en `js/common.
 ---
 
 Material docente del curso UMAT205 — UEES 2026.
-Bibliografía base: Larson (2016) *Fundamentos de Álgebra Lineal* 7.ª ed.; Grossman & Flores (2019) *Álgebra Lineal* 8.ª ed.
+Bibliografía base: Grossman & Flores (2019) *Álgebra Lineal* 8.ª ed.; Deisenroth, Faisal & Ong (2020) *Mathematics for Machine Learning*.
+Complementaria: Strang (2019) *Linear Algebra and Learning from Data*.

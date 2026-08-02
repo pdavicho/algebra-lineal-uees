@@ -21,12 +21,12 @@
     <div class="slide-inner">
       <img class="logo-uees" src="../../assets/logo-uees.png" alt="Universidad Espíritu Santo">
       <div class="meta-row">
-        <span class="chip teoria">Clase 01 · Teoría</span>
+        <span class="chip semana">Clase 01 · Semana 1</span>
         <span class="chip u1">Unidad 1 · Matrices y determinantes</span>
       </div>
       <h1>¿Qué es una <span class="hl">matriz</span>?</h1>
       <p class="lead">
-        Definición, tipos y operaciones — y por qué cada foto de tu teléfono
+        Definición, operaciones y eliminación de Gauss — y por qué cada foto de tu teléfono
         y cada Inteligencia Artificial que usas <b>es</b> álgebra lineal.
       </p>
       <p class="start-hint">Usa <kbd>←</kbd> <kbd>→</kbd> o los botones para navegar · <kbd>F</kbd> pantalla completa</p>
@@ -42,11 +42,12 @@
         <li><b>Definir</b> qué es una matriz, su dimensión y la notación $a_{ij}$ de sus elementos.</li>
         <li><b>Identificar</b> los tipos de matrices: fila, columna, cuadrada, nula, identidad, diagonal y triangular.</li>
         <li><b>Operar</b>: suma, resta, multiplicación por escalar y <b>producto de matrices</b>, verificando la compatibilidad de dimensiones.</li>
-        <li><b>Reconocer</b> dónde viven las matrices dentro de la Inteligencia Artificial.</li>
+        <li><b>Resolver</b> sistemas de ecuaciones por <b>eliminación de Gauss y Gauss-Jordan</b>.</li>
+        <li><b>Aplicar</b> todo lo anterior al reto de la semana: reconstruir y editar una imagen tratándola como matriz.</li>
       </ul>
       <div class="callout">
         <p class="callout-title">📌 En el sílabo</p>
-        <p>Temas 1.1, 1.2 y 1.3 de la Unidad 1 · Resultado de aprendizaje RDA1.</p>
+        <p>Temas 1.1, 1.2, 1.3 y 1.4 de la Unidad 1 · Resultado de aprendizaje RDA1.</p>
       </div>
     </div>
   </section>
@@ -313,6 +314,104 @@
     </div>
   </section>
 
+  <!-- ============ 15b · POR QUÉ RESOLVER SISTEMAS ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Tema 1.4 · el problema</span>
+      <h2 class="slide-title">De la matriz al sistema de ecuaciones</h2>
+      <p>
+        Muchos problemas se reducen a resolver varias ecuaciones lineales <b>a la vez</b>.
+        Por ejemplo, si en una imagen se borró un píxel, su valor "correcto" debe ser
+        consistente con sus vecinos — eso es un <b>sistema de ecuaciones</b>:
+      </p>
+      <div class="big-math">
+        $$\begin{cases} 2x + y - z = 8 \\ -3x - y + 2z = -11 \\ -2x + y + 2z = -3 \end{cases}
+        \;\;\Longleftrightarrow\;\;
+        \begin{pmatrix} 2 & 1 & -1 \\ -3 & -1 & 2 \\ -2 & 1 & 2 \end{pmatrix}
+        \begin{pmatrix} x \\ y \\ z \end{pmatrix} =
+        \begin{pmatrix} 8 \\ -11 \\ -3 \end{pmatrix}$$
+      </div>
+      <p>
+        La matriz de coeficientes ampliada con la columna de resultados, $[A \mid b]$,
+        contiene <b>toda</b> la información del sistema. Resolverlo es <b>simplificar
+        esa matriz</b> hasta leer la respuesta directamente.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ 15c · OPERACIONES ELEMENTALES ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Tema 1.4</span>
+      <h2 class="slide-title">Las tres operaciones elementales de fila</h2>
+      <p>Puedes transformar $[A \mid b]$ sin cambiar su solución si solo usas estas tres jugadas:</p>
+      <div class="type-grid">
+        <div class="type-card"><div class="t-name">🔀 Intercambiar</div><p class="hint">$F_i \leftrightarrow F_j$<br>cambiar el orden de dos filas</p></div>
+        <div class="type-card"><div class="t-name">✖️ Escalar</div><p class="hint">$F_i \to k \cdot F_i$<br>multiplicar una fila por $k \neq 0$</p></div>
+        <div class="type-card" style="border-color:var(--accent); border-width:2px"><div class="t-name">➕ Combinar</div><p class="hint">$F_i \to F_i + k \cdot F_j$<br>sumar un múltiplo de otra fila</p></div>
+      </div>
+      <div class="callout">
+        <p class="callout-title">🎯 La estrategia</p>
+        <p>
+          Usamos estas tres operaciones para ir haciendo <b>ceros</b> debajo (Gauss) y también
+          arriba (Gauss-Jordan) de cada pivote, hasta que la matriz "cuenta la solución sola".
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 15d · GAUSS vs GAUSS-JORDAN ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Tema 1.4</span>
+      <h2 class="slide-title">Eliminación de Gauss y de Gauss-Jordan</h2>
+      <div class="cols">
+        <div class="card">
+          <p style="margin:0"><b>Gauss</b> deja la matriz en <b>forma escalonada</b>: ceros
+          solo <i>debajo</i> de cada pivote. La solución se obtiene después por
+          <b>sustitución hacia atrás</b>.</p>
+          <div class="big-math" style="font-size:1rem">$$\begin{pmatrix} 1 & * & * & \vert & * \\ 0 & 1 & * & \vert & * \\ 0 & 0 & 1 & \vert & * \end{pmatrix}$$</div>
+        </div>
+        <div class="card">
+          <p style="margin:0"><b>Gauss-Jordan</b> sigue un paso más: hace ceros
+          <i>arriba y debajo</i> de cada pivote — <b>forma escalonada reducida</b>.
+          La solución queda lista, sin sustituir nada.</p>
+          <div class="big-math" style="font-size:1rem">$$\begin{pmatrix} 1 & 0 & 0 & \vert & x \\ 0 & 1 & 0 & \vert & y \\ 0 & 0 & 1 & \vert & z \end{pmatrix}$$</div>
+        </div>
+      </div>
+      <p class="hint">Hoy usaremos Gauss-Jordan: es el que necesitaremos para el reto de "reconstruir píxeles" de esta semana.</p>
+    </div>
+  </section>
+
+  <!-- ============ 15e · DEMO GAUSS-JORDAN ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Manos a la obra</span>
+      <h2 class="slide-title">Eliminación de Gauss-Jordan, paso a paso</h2>
+      <p>Cada clic aplica una operación elemental de fila. Observa el pivoteo parcial: siempre se sube la fila con mayor valor absoluto.</p>
+      <div class="demo">
+        <div class="demo-title">Demo · Reducción a la forma escalonada reducida (RREF)</div>
+        <div id="demo-gauss"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 15f · CONEXIÓN CON EL RETO ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">El reto de esta semana</span>
+      <h2 class="slide-title">Todo lo de hoy, en una sola imagen</h2>
+      <p>El reto de Colab de esta semana, <b>"La imagen es una matriz"</b>, usa cada operación que viste hoy:</p>
+      <div class="type-grid">
+        <div class="type-card"><div class="t-name">🎨 Blending</div><p class="hint">suma ponderada de dos imágenes: $\alpha A + (1-\alpha) B$</p></div>
+        <div class="type-card"><div class="t-name">🏃 Detección de movimiento</div><p class="hint">resta entre dos fotogramas, $\lvert A - B \rvert$</p></div>
+        <div class="type-card"><div class="t-name">💡 Ajuste de brillo</div><p class="hint">multiplicación por escalar, $k \cdot A$</p></div>
+        <div class="type-card" style="border-color:var(--accent); border-width:2px"><div class="t-name">🧩 Inpainting</div><p class="hint">reconstruir píxeles faltantes resolviendo un sistema con Gauss-Jordan</p></div>
+      </div>
+      <p class="hint">Las primeras tres ya las dominas. La última —<b>inpainting</b>— es la aplicación directa de lo que acabas de practicar en la demo.</p>
+    </div>
+  </section>
+
   <!-- ============ 16 · IA: PESOS ============ -->
   <section class="slide">
     <div class="slide-inner">
@@ -363,9 +462,9 @@
       <div class="callout ia">
         <p class="callout-title">🔮 Lo que viene</p>
         <p>
-          En las clases <b>12, 14 y 16</b> abriremos una matriz de embeddings real en Colab,
-          haremos aritmética con palabras (rey − hombre + mujer ≈ reina) y construiremos un
-          buscador semántico. Todo con las operaciones de hoy.
+          En las clases <b>5 y 6</b> abriremos una matriz de embeddings real en Colab,
+          haremos aritmética con palabras (rey − hombre + mujer ≈ reina) y la comprimiremos
+          con PCA. Todo con las operaciones de hoy.
         </p>
       </div>
     </div>
@@ -391,13 +490,14 @@
       <h2 class="slide-title">Práctica en Google Colab</h2>
       <p>
         Hora de escribir código: en el notebook de esta clase crearás tus primeras matrices
-        con <b>NumPy</b>, harás las cuatro operaciones y comprobarás que una imagen es una
-        matriz — subiéndole el brillo con una multiplicación por escalar.
+        con <b>NumPy</b> y resolverás el reto <b>"La imagen es una matriz"</b> — blending,
+        detección de movimiento y ajuste de brillo sobre imágenes reales, y reconstrucción
+        de píxeles faltantes (inpainting simplificado) con Gauss-Jordan.
       </p>
       <div class="colab-box">
         <span class="icon">🐍</span>
         <div class="txt">
-          <p><b>Notebook · Clase 01:</b> Matrices con NumPy — tu primera imagen como matriz.</p>
+          <p><b>Notebook · Clase 01:</b> Matrices con NumPy — la imagen es una matriz.</p>
           <p>Se abre y se ejecuta en tu navegador con tu cuenta de Google. Nada que instalar.</p>
         </div>
         <a class="colab-btn" data-notebook="notebooks/clase-01.ipynb" href="#">▶ Abrir en Colab</a>
@@ -421,8 +521,9 @@
       <div class="callout ia">
         <p class="callout-title">💪 Reto opcional</p>
         <p>
-          Termina los dos retos del notebook de Colab y trae a la próxima clase
-          una foto tuya editada solo con operaciones de matrices.
+          Termina el reto completo del notebook de Colab (incluido el inpainting con
+          Gauss-Jordan) y trae a la próxima clase una foto tuya editada solo con
+          operaciones de matrices.
         </p>
       </div>
     </div>
@@ -437,11 +538,11 @@
         <div class="type-card"><div class="t-name">✔ Matriz</div><p class="hint">arreglo $m \times n$; elemento $a_{ij}$ = fila $i$, columna $j$</p></div>
         <div class="type-card"><div class="t-name">✔ Tipos</div><p class="hint">fila, columna, cuadrada, nula, identidad, diagonal, triangular</p></div>
         <div class="type-card"><div class="t-name">✔ Operaciones</div><p class="hint">suma/resta y escalar (elemento a elemento); producto = fila × columna</p></div>
-        <div class="type-card"><div class="t-name">✔ IA</div><p class="hint">un LLM son matrices gigantes; cada palabra, una fila de $E$</p></div>
+        <div class="type-card"><div class="t-name">✔ Gauss-Jordan</div><p class="hint">operaciones elementales de fila hasta la forma escalonada reducida</p></div>
       </div>
       <p style="margin-top:2rem">
-        <b>Próxima clase:</b> NumPy a fondo — matrices como datos y tu primera
-        imagen manipulada con código. 📸
+        <b>Próxima clase:</b> inversa y determinante de una matriz — y cómo se
+        usan para calcular a mano los pesos de una regresión lineal. 📈
       </p>
       <p><a class="colab-btn" href="../clase-02/index.html" style="background:var(--accent);color:#fff">Ir a la Clase 02 →</a></p>
     </div>
@@ -460,6 +561,7 @@
   initMatrixSum("demo-sum");
   initScalarDemo("demo-scalar");
   initMatrixProduct("demo-product");
+  initGaussJordan("demo-gauss");
 
   // Quiz (formato Blackboard: opción múltiple + proceso)
   const PREGUNTAS = [
@@ -552,6 +654,28 @@
       ],
       correct: 0,
       explain: "Cada píxel es un elemento $a_{ij}$ con su nivel de gris (0–255): la imagen completa es una matriz $1080 \\times 1920$. Igual que en la demo de la carita 😀.",
+    },
+    {
+      q: "¿Cuál de estas NO es una operación elemental de fila válida en la eliminación de Gauss-Jordan?",
+      opts: [
+        "Intercambiar dos filas: $F_i \\leftrightarrow F_j$",
+        "Multiplicar una fila por un escalar distinto de cero: $F_i \\to k \\cdot F_i$",
+        "Sumar a una fila un múltiplo de otra: $F_i \\to F_i + k \\cdot F_j$",
+        "Multiplicar una fila por otra fila, elemento a elemento",
+      ],
+      correct: 3,
+      explain: "Las tres operaciones elementales son intercambiar, escalar y combinar filas. \"Multiplicar una fila por otra\" no es una operación elemental válida.",
+    },
+    {
+      q: "¿Cuál es la diferencia principal entre la eliminación de Gauss y la de Gauss-Jordan?",
+      opts: [
+        "Gauss solo funciona con matrices cuadradas; Gauss-Jordan con cualquier dimensión",
+        "Gauss hace ceros solo debajo del pivote (forma escalonada); Gauss-Jordan también arriba (forma escalonada reducida)",
+        "Gauss-Jordan no usa operaciones elementales de fila",
+        "Son exactamente el mismo método con otro nombre",
+      ],
+      correct: 1,
+      explain: "Gauss se detiene en la forma escalonada y requiere sustitución hacia atrás; Gauss-Jordan continúa hasta la forma escalonada <b>reducida</b>, donde la solución ya está lista en la última columna.",
     },
   ];
 

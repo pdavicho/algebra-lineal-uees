@@ -258,6 +258,8 @@ main.wrap { padding-bottom: 4rem; }
 
 .chip.teoria   { background: var(--accent-soft); color: var(--accent-ink); }
 .chip.practica { background: #e8f4ec; color: #055229; }
+.chip.semana   { background: var(--accent-soft); color: var(--accent-ink); }
+.chip.examen   { background: var(--u3-soft); color: var(--u3); }
 .chip.u1 { background: var(--u1-soft); color: var(--u1); }
 .chip.u2 { background: var(--u2-soft); color: var(--u2); }
 .chip.u3 { background: var(--u3-soft); color: var(--u3); }
@@ -502,6 +504,8 @@ select, input[type="number"] {
 .matrix .cell.hl-col  { background: #e8f4ec; color: #055229; }
 .matrix .cell.hl-out  { background: var(--u3-soft); color: var(--u3); transform: scale(1.08); }
 .matrix .cell.done    { background: var(--ok-soft); color: var(--ok); }
+.matrix .cell.pivot-row { outline: 2px solid var(--u2); }
+.matrix .cell.aug-sep  { margin-left: .6rem; border-left: 2.5px dashed var(--ink); padding-left: .55rem; }
 
 .matrix-label {
   text-align: center;

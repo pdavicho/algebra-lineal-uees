@@ -40,7 +40,7 @@ const COURSE = [
     desc: "La matriz inversa, el determinante y sus propiedades — aplicados a calcular a mano los pesos exactos de un modelo lineal.",
     temas: ["1.5 Inversa de una matriz", "1.6 Determinante de una matriz", "1.7 Propiedades de los determinantes"],
     reto: "Reto Colab · \"Regresión lineal desde cero\": matriz de diseño X, XᵀX, determinante e inversa para obtener los pesos w=(XᵀX)⁻¹Xᵀy; diagnóstico de matrices singulares por multicolinealidad.",
-    listo: false,
+    listo: true,
   },
   {
     num: 3, unidad: 2, semana: 3, rda: "RDA2",

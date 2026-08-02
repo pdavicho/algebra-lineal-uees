@@ -718,3 +718,218 @@ function initGaussJordan(rootId) {
 
   build();
 }
+
+/* =========================================================================
+   DEMO 7 — Calculadora de inversas 2×2 (fórmula directa)
+   Recalcula det(A) y A⁻¹ en vivo mientras se edita A; si det = 0 muestra
+   que la matriz es singular en vez de romperse.
+   ========================================================================= */
+
+function initInverseCalc2x2(rootId) {
+  const root = document.getElementById(rootId);
+  if (!root) return;
+
+  const DEFAULT = [[3, 1], [2, 1]];
+
+  root.innerHTML = `
+    <div class="matrix-wrap">
+      <div><div data-role="A"></div><div class="matrix-label">A</div></div>
+      <span class="op-symbol" data-role="detsym">det = ?</span>
+      <div><div data-role="Inv"></div><div class="matrix-label">A⁻¹</div></div>
+    </div>
+    <p class="step-caption" data-role="cap"></p>
+    <div class="controls" style="justify-content:center">
+      <button class="btn secondary" data-role="singular">Probar un caso SIN inversa</button>
+      <button class="btn secondary" data-role="reset">↺ Reiniciar</button>
+    </div>
+    <p class="hint">Truco de la fórmula: intercambia la diagonal principal (a↔d), cambia el signo de los
+       otros dos (b, c), y divide todo entre el determinante.</p>`;
+
+  const A = buildMatrixInputs(root.querySelector('[data-role="A"]'), 2, 2, DEFAULT, recalc);
+  const Inv = buildMatrixDisplay(root.querySelector('[data-role="Inv"]'), 2, 2);
+  const detSym = root.querySelector('[data-role="detsym"]');
+  const cap = root.querySelector('[data-role="cap"]');
+
+  function recalc() {
+    const M = readMatrix(A);
+    const a = M[0][0], b = M[0][1], c = M[1][0], d = M[1][1];
+    const det = a * d - b * c;
+    detSym.innerHTML = `det = ${fmtNum(det)}`;
+
+    if (Math.abs(det) < 1e-9) {
+      Inv.cells.forEach((cell) => { cell.textContent = "—"; });
+      cap.innerHTML = `⚠️ det(A) = 0 → <b>A NO tiene inversa</b> (es singular).`;
+    } else {
+      const inv = [[d / det, -b / det], [-c / det, a / det]];
+      Inv.cells.forEach((cell) => {
+        const i = Number(cell.dataset.i), j = Number(cell.dataset.j);
+        cell.textContent = fmtNum(inv[i][j]);
+      });
+      cap.innerHTML = `det ≠ 0 → A⁻¹ = (1/${fmtNum(det)})·[[d,−b],[−c,a]]. Verifica multiplicando A·A⁻¹ = I.`;
+    }
+  }
+
+  root.querySelector('[data-role="singular"]').addEventListener("click", () => {
+    const scale = randInt(2, 3);
+    const r1 = [randInt(1, 4), randInt(1, 4)];
+    A.inputs[0].value = r1[0]; A.inputs[1].value = r1[1];
+    A.inputs[2].value = r1[0] * scale; A.inputs[3].value = r1[1] * scale;
+    recalc();
+  });
+
+  root.querySelector('[data-role="reset"]').addEventListener("click", () => {
+    A.inputs[0].value = DEFAULT[0][0]; A.inputs[1].value = DEFAULT[0][1];
+    A.inputs[2].value = DEFAULT[1][0]; A.inputs[3].value = DEFAULT[1][1];
+    recalc();
+  });
+
+  recalc();
+}
+
+/* =========================================================================
+   DEMO 8 — Inversa por Gauss-Jordan sobre [A | I]
+   Mismo motor que planGaussJordan (Demo 6): en vez de pegar A con un vector
+   b, se pega con la identidad completa. Si la izquierda no llega a ser I,
+   la matriz es singular (no tiene inversa).
+   ========================================================================= */
+
+function buildIdentity(n) {
+  return Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 1 : 0)));
+}
+
+function buildInverseAugmentedInputs(parent, n, valuesA, onChange) {
+  const identity = buildIdentity(n);
+  const values = valuesA.map((row, i) => row.concat(identity[i]));
+  const grid = buildMatrixInputs(parent, n, 2 * n, values, onChange);
+  grid.inputs.forEach((inp) => {
+    if (Number(inp.dataset.j) === n) inp.classList.add("aug-sep");
+  });
+  return grid;
+}
+
+function initInverseGaussJordan(rootId) {
+  const root = document.getElementById(rootId);
+  if (!root) return;
+
+  const DEFAULT2 = [[4, 3], [2, 2]];
+  const DEFAULT3 = [[2, 0, 1], [1, 3, 2], [0, 1, 1]];
+
+  root.innerHTML = `
+    <div class="controls">
+      <label>Tamaño de A:</label>
+      <select data-role="n">${[2, 3].map((n) => `<option ${n === 3 ? "selected" : ""}>${n}</option>`).join("")}</select>
+    </div>
+    <div class="matrix-wrap">
+      <div><div data-role="host"></div><div class="matrix-label">[ A | I ]</div></div>
+    </div>
+    <p class="step-caption" data-role="cap">Edita A si quieres, o presiona "Siguiente paso" para reducirla.</p>
+    <div class="controls" style="justify-content:center">
+      <button class="btn" data-role="step">Siguiente paso ▸</button>
+      <button class="btn secondary" data-role="auto">▶ Automático</button>
+      <button class="btn secondary" data-role="reset">↺ Reiniciar</button>
+    </div>
+    <p class="hint">Mismas 3 operaciones elementales de fila de la Clase 01. Cuando la izquierda llegue a ser
+       I, la derecha ES A⁻¹. Si una columna se queda sin pivote, A no tiene inversa.</p>`;
+
+  const host = root.querySelector('[data-role="host"]');
+  const selN = root.querySelector('[data-role="n"]');
+  const cap = root.querySelector('[data-role="cap"]');
+  const btnStep = root.querySelector('[data-role="step"]');
+  const btnAuto = root.querySelector('[data-role="auto"]');
+  const btnReset = root.querySelector('[data-role="reset"]');
+
+  let grid, n, savedA, tasks, taskIdx, timer = null;
+
+  function paint(M) {
+    grid.inputs.forEach((inp) => { inp.value = fmtNum(M[inp.dataset.i][inp.dataset.j]); });
+  }
+
+  function clearHighlights() {
+    grid.inputs.forEach((inp) => inp.classList.remove("hl-row", "hl-col", "hl-out"));
+  }
+
+  function rebuildPlan() {
+    const augmented = savedA.map((row, i) => row.concat(buildIdentity(n)[i]));
+    tasks = planGaussJordan(augmented).tasks;
+    taskIdx = 0;
+    btnStep.disabled = tasks.length === 0;
+  }
+
+  function onEdit() {
+    if (taskIdx !== 0) return;
+    const full = readMatrix(grid);
+    savedA = full.map((row) => row.slice(0, n));
+    rebuildPlan();
+  }
+
+  function build() {
+    stopAuto();
+    n = Number(selN.value);
+    savedA = (n === 3 ? DEFAULT3 : DEFAULT2).map((r) => r.slice());
+    host.innerHTML = "";
+    grid = buildInverseAugmentedInputs(host, n, savedA, onEdit);
+    rebuildPlan();
+    clearHighlights();
+    cap.innerHTML = tasks.length
+      ? `Sistema listo: ${tasks.length} operaciones hasta el RREF. Presiona "Siguiente paso".`
+      : "Esta matriz ya está reducida.";
+  }
+
+  function doStep() {
+    if (taskIdx >= tasks.length) return;
+    if (taskIdx === 0) grid.inputs.forEach((inp) => { inp.disabled = true; });
+    clearHighlights();
+    const t = tasks[taskIdx];
+
+    if (t.type === "swap") {
+      cap.innerHTML = `<b>F${t.a + 1} ↔ F${t.b + 1}</b> — pivoteo parcial: subimos el mayor valor absoluto.`;
+      grid.inputs.forEach((inp) => {
+        if (Number(inp.dataset.i) === t.a) inp.classList.add("hl-row");
+        if (Number(inp.dataset.i) === t.b) inp.classList.add("hl-col");
+      });
+    } else if (t.type === "norm") {
+      cap.innerHTML = `<b>F${t.row + 1} → F${t.row + 1} ÷ ${fmtNum(t.pivVal)}</b> — normalizamos el pivote a 1.`;
+      grid.inputs.forEach((inp) => { if (Number(inp.dataset.i) === t.row) inp.classList.add("hl-out"); });
+    } else {
+      cap.innerHTML = `<b>F${t.target + 1} → F${t.target + 1} − (${fmtNum(t.factor)})·F${t.source + 1}</b> — hacemos 0 arriba/abajo del pivote.`;
+      grid.inputs.forEach((inp) => {
+        if (Number(inp.dataset.i) === t.source) inp.classList.add("hl-col");
+        if (Number(inp.dataset.i) === t.target) inp.classList.add("hl-out");
+      });
+    }
+
+    paint(t.snapshot);
+    taskIdx++;
+
+    if (taskIdx >= tasks.length) {
+      btnStep.disabled = true;
+      stopAuto();
+      const M = t.snapshot;
+      const leftIsIdentity = M.every((row, i) =>
+        row.slice(0, n).every((v, j) => Math.abs(v - (i === j ? 1 : 0)) < 1e-6));
+      cap.innerHTML = leftIsIdentity
+        ? `🎉 Izquierda = I → la derecha ES A⁻¹.`
+        : `⚠️ Quedó una fila de ceros del lado izquierdo → <b>A NO tiene inversa</b> (singular, det(A)=0).`;
+    }
+  }
+
+  function stopAuto() {
+    if (timer) { clearInterval(timer); timer = null; btnAuto.textContent = "▶ Automático"; }
+  }
+
+  btnStep.addEventListener("click", doStep);
+  btnReset.addEventListener("click", build);
+  selN.addEventListener("change", build);
+  btnAuto.addEventListener("click", () => {
+    if (timer) { stopAuto(); return; }
+    if (btnStep.disabled) build();
+    btnAuto.textContent = "⏸ Pausar";
+    doStep();
+    timer = setInterval(() => {
+      if (btnStep.disabled) stopAuto();
+      else doStep();
+    }, 1800);
+  });
+
+  build();
+}

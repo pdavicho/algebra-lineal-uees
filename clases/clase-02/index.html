@@ -7,11 +7,16 @@
   <link rel="icon" href="../../assets/logo-uees.png">
   <link rel="stylesheet" href="../../css/style.css">
   <link rel="stylesheet" href="../../css/slides.css">
+  <!-- KaTeX para fórmulas matemáticas -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
 </head>
 <body>
 
 <div class="deck">
 
+  <!-- ============ 1 · PORTADA ============ -->
   <section class="slide portada">
     <div class="slide-inner">
       <img class="logo-uees" src="../../assets/logo-uees.png" alt="Universidad Espíritu Santo">
@@ -19,32 +24,471 @@
         <span class="chip semana">Clase 02 · Semana 2</span>
         <span class="chip u1">Unidad 1 · Matrices y determinantes</span>
       </div>
-      <h1>Inversa y determinante: la regresión lineal desde cero</h1>
-      <p class="lead">La matriz inversa, el determinante y sus propiedades — aplicados a calcular a mano los pesos exactos de un modelo lineal.</p>
-      <div class="objetivos" style="text-align:left; max-width:36rem; margin:1.6rem auto 0">
-        <h2>Temario (según el sílabo)</h2>
-        <ul>
-        <li>1.5 Inversa de una matriz</li>
-        <li>1.6 Determinante de una matriz</li>
-        <li>1.7 Propiedades de los determinantes</li>
-        </ul>
-        <h2>Reto de la semana</h2>
-        <ul>
-        <li>Reto Colab · "Regresión lineal desde cero": matriz de diseño X, XᵀX, determinante e inversa para obtener los pesos w=(XᵀX)⁻¹Xᵀy; diagnóstico de matrices singulares por multicolinealidad.</li>
-        </ul>
+      <h1>Inversa y <span class="hl">determinante</span>: la regresión lineal desde cero</h1>
+      <p class="lead">
+        Cómo "deshacer" una matriz, cuándo se puede, y cómo con eso calculas a mano
+        los pesos exactos de un modelo lineal.
+      </p>
+      <p class="start-hint">Usa <kbd>←</kbd> <kbd>→</kbd> o los botones para navegar · <kbd>F</kbd> pantalla completa</p>
+    </div>
+  </section>
+
+  <!-- ============ 2 · OBJETIVOS ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Hoy vas a lograr</span>
+      <h2 class="slide-title">Objetivos de la clase</h2>
+      <ul>
+        <li><b>Calcular</b> la inversa de una matriz con la fórmula directa (2×2) y con Gauss-Jordan (general).</li>
+        <li><b>Calcular</b> determinantes 2×2 y 3×3, e interpretarlos geométricamente.</li>
+        <li><b>Usar</b> el determinante como criterio: ¿esta matriz se puede "deshacer" o no?</li>
+        <li><b>Construir</b> desde cero una regresión lineal: $w=(X^\top X)^{-1}X^\top y$.</li>
+        <li><b>Diagnosticar</b> multicolinealidad cuando el modelo no se puede ajustar.</li>
+      </ul>
+      <div class="callout">
+        <p class="callout-title">📌 En el sílabo</p>
+        <p>Temas 1.5, 1.6 y 1.7 de la Unidad 1 · Resultado de aprendizaje RDA1.</p>
       </div>
-      <p class="start-hint">🚧 Presentación en construcción — seguirá el formato interactivo de la
-        <a href="../clase-01/index.html">Clase 01</a>.</p>
-      <div class="meta-row" style="margin-top:1.2rem">
-        <a class="colab-btn" href="../clase-01/index.html" style="background:var(--accent);color:#fff">← Clase anterior</a>
-        <a class="colab-btn" href="../clase-03/index.html" style="background:var(--accent);color:#fff">Clase siguiente →</a>
+    </div>
+  </section>
+
+  <!-- ============ 3 · GANCHO ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Para empezar</span>
+      <h2 class="slide-title">¿Por qué "deshacer" una matriz?</h2>
+      <p>
+        Con números normales, deshacer $3x=12$ es dividir entre 3. Con matrices no existe
+        <code>A / B</code>. Pero si necesitas resolver $Ax=b$ para <b>muchos</b> valores distintos
+        de $b$, calcular $A^{-1}$ una sola vez te ahorra repetir Gauss-Jordan cada vez:
+      </p>
+      <div class="big-math">$$x = A^{-1}b$$</div>
+      <div class="callout">
+        <p class="callout-title">💬 Piénsalo</p>
+        <p>¿Qué otro proceso de la vida real es útil "deshacer"? (cifrar/descifrar un mensaje,
+        reconstruir una receta a partir del platillo terminado…)</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4 · DEFINICIÓN FORMAL ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Definición · Tema 1.5</span>
+      <h2 class="slide-title">La matriz inversa</h2>
+      <p>
+        La inversa de una matriz <b>cuadrada</b> $A$ es otra matriz $A^{-1}$ tal que
+      </p>
+      <div class="big-math">$$A \cdot A^{-1} = A^{-1} \cdot A = I$$</div>
+      <div class="cols">
+        <div class="card">
+          <p style="margin:0"><b>Invertible</b> (o "regular", "no singular"): $\det(A) \neq 0$.
+          Existe $A^{-1}$.</p>
+        </div>
+        <div class="card">
+          <p style="margin:0"><b>Singular</b>: $\det(A) = 0$. NO existe $A^{-1}$ — no se puede
+          "deshacer".</p>
+        </div>
+      </div>
+      <p class="hint">Todavía no vimos cómo calcular el determinante — ya sabes para qué sirve.</p>
+    </div>
+  </section>
+
+  <!-- ============ 5 · FÓRMULA DIRECTA 2×2 ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">El atajo · 2×2</span>
+      <h2 class="slide-title">Fórmula directa para 2×2</h2>
+      <p>Si $A=\begin{pmatrix}a&b\\c&d\end{pmatrix}$:</p>
+      <div class="big-math">$$A^{-1} = \frac{1}{ad-bc}\begin{pmatrix}d&-b\\-c&a\end{pmatrix}$$</div>
+      <div class="callout">
+        <p class="callout-title">🧠 Cómo memorizarla</p>
+        <p>Intercambia la diagonal principal ($a \leftrightarrow d$), cambia el signo de los otros dos
+        ($b$, $c$), y divide todo entre $ad-bc$ — que es el determinante. Si da 0, no puedes dividir:
+        ahí está la razón matemática de por qué no hay inversa.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 6 · DEMO CALCULADORA DE INVERSAS ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Manos a la obra</span>
+      <h2 class="slide-title">Demo: calculadora de inversas 2×2</h2>
+      <p>Edita los valores de A y observa el determinante y la inversa en tiempo real.</p>
+      <div class="demo">
+        <div class="demo-title">Demo · Inversa 2×2 con fórmula directa</div>
+        <div id="demo-inverse2x2"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 7 · MÉTODO GENERAL: [A|I] ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Para 3×3 en adelante</span>
+      <h2 class="slide-title">Método general: Gauss-Jordan sobre [A | I]</h2>
+      <p>
+        Reciclamos Gauss-Jordan de la Clase 01: en vez de pegar $A$ con un vector $b$, la pegamos con
+        la <b>identidad completa</b>. Reduces la izquierda hasta que sea $I$ — lo que queda a la
+        derecha ES $A^{-1}$.
+      </p>
+      <div class="demo">
+        <div class="demo-title">Demo · Inversa por Gauss-Jordan</div>
+        <div id="demo-inverse-gj"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 8 · PROPIEDADES DE LA INVERSA ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Tema 1.5</span>
+      <h2 class="slide-title">Propiedades de la inversa</h2>
+      <div class="card">
+        <table class="simple">
+          <tr><th>Propiedad</th><th>Enunciado</th></tr>
+          <tr><td>Inversa de la inversa</td><td>$(A^{-1})^{-1} = A$</td></tr>
+          <tr><td>Inversa de la transpuesta</td><td>$(A^{-1})^\top = (A^\top)^{-1}$</td></tr>
+          <tr><td>Inversa de un múltiplo</td><td>$(kA)^{-1} = \frac{1}{k}A^{-1}$</td></tr>
+          <tr><td style="border-color:var(--accent)"><b>Inversa de un producto</b></td><td><b>$(AB)^{-1} = B^{-1}A^{-1}$</b> — ¡el orden se invierte!</td></tr>
+        </table>
+      </div>
+      <p class="hint">Igual que "quitarte primero los zapatos y después las medias" para deshacer
+      "ponerte medias y luego zapatos" — conecta con que el producto no es conmutativo (Clase 01).</p>
+    </div>
+  </section>
+
+  <!-- ============ 9 · DETERMINANTE 2×2 ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Definición · Tema 1.6</span>
+      <h2 class="slide-title">El determinante</h2>
+      <p>
+        Un único número que resume información clave de una matriz cuadrada. Para 2×2:
+      </p>
+      <div class="big-math">$$\det\begin{pmatrix}a&b\\c&d\end{pmatrix} = ad-bc$$</div>
+      <p>Ya lo usaste en el slide 5 sin saberlo — es exactamente el denominador de la fórmula de la inversa.</p>
+    </div>
+  </section>
+
+  <!-- ============ 10 · DETERMINANTE 3×3: SARRUS ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Tema 1.6</span>
+      <h2 class="slide-title">Determinante 3×3: Regla de Sarrus</h2>
+      <p>Repite las dos primeras columnas a la derecha; suma las diagonales "hacia abajo", resta las de "hacia arriba":</p>
+      <div class="big-math">
+        $$\det\begin{pmatrix}a_{11}&a_{12}&a_{13}\\a_{21}&a_{22}&a_{23}\\a_{31}&a_{32}&a_{33}\end{pmatrix}
+        = a_{11}a_{22}a_{33}+a_{12}a_{23}a_{31}+a_{13}a_{21}a_{32} - a_{13}a_{22}a_{31}-a_{11}a_{23}a_{32}-a_{12}a_{21}a_{33}$$
+      </div>
+      <div class="callout">
+        <p class="callout-title">✏️ Ejemplo en vivo</p>
+        <p>$A=\begin{pmatrix}2&1&0\\1&3&1\\0&1&2\end{pmatrix}$: diagonales ↘ = $12+0+0=12$,
+        diagonales ↗ = $0+2+2=4$ → $\det(A)=12-4=8$.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 11 · INTERPRETACIÓN GEOMÉTRICA ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">El porqué, no solo el cómo</span>
+      <h2 class="slide-title">Interpretación geométrica</h2>
+      <p>
+        Las columnas de una matriz 2×2 son dos vectores. $|\det(A)|$ es el <b>área</b> del
+        paralelogramo que forman (en 3×3, el <b>volumen</b>).
+      </p>
+      <div class="callout warn">
+        <p class="callout-title">⚠️ Si el determinante da 0…</p>
+        <p>
+          …el paralelogramo se "aplastó" a una línea (o el paralelepípedo, a un plano) — se perdió
+          una dimensión geométrica. Por eso una matriz con $\det=0$ no se puede invertir: la
+          transformación aplasta el espacio y ya no hay forma de deshacerla sin perder información.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 12 · EL GRAN TEOREMA ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">El resumen más importante de hoy</span>
+      <h2 class="slide-title">El gran teorema de invertibilidad</h2>
+      <p>Para una matriz cuadrada $A$, estas afirmaciones son <b>equivalentes</b> — si una es cierta, TODAS lo son:</p>
+      <div class="type-grid">
+        <div class="type-card"><div class="t-name">$\det(A) \neq 0$</div></div>
+        <div class="type-card"><div class="t-name">$A$ es invertible</div></div>
+        <div class="type-card"><div class="t-name">$Ax=b$ tiene solución única</div></div>
+        <div class="type-card"><div class="t-name">Filas/columnas de $A$ son independientes</div></div>
+      </div>
+      <p class="hint">"Linealmente independientes" se formaliza en la Semana 5 — hoy ya lo usas en la práctica.</p>
+    </div>
+  </section>
+
+  <!-- ============ 13 · PROPIEDADES DE LOS DETERMINANTES ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Tema 1.7</span>
+      <h2 class="slide-title">Propiedades de los determinantes</h2>
+      <div class="card">
+        <table class="simple">
+          <tr><th>Propiedad</th><th>Enunciado</th></tr>
+          <tr><td>Producto</td><td>$\det(AB) = \det(A)\cdot\det(B)$</td></tr>
+          <tr><td>Transpuesta</td><td>$\det(A^\top) = \det(A)$</td></tr>
+          <tr><td>Triangular</td><td>producto de la diagonal principal</td></tr>
+          <tr style="border-color:var(--accent)"><td><b>Filas/columnas proporcionales</b></td><td><b>$\det(A) = 0$</b></td></tr>
+        </table>
+      </div>
+      <p class="hint">La última fila es la que van a usar en 20 minutos para diagnosticar multicolinealidad.</p>
+    </div>
+  </section>
+
+  <!-- ============ 14 · LA HISTORIA REAL DE "REGRESIÓN" ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">De dónde sale el nombre</span>
+      <h2 class="slide-title">1886: por qué se llama "regresión"</h2>
+      <div class="callout ia">
+        <p class="callout-title">📜 Francis Galton, 1886</p>
+        <p>
+          Midió la altura de <b>1,078 familias</b> inglesas y descubrió que los hijos de padres muy
+          altos tendían a ser más bajos que ellos — y los hijos de padres bajos, más altos. La altura
+          "regresaba" hacia el promedio de la población. De ahí el nombre de la técnica que vas a
+          construir hoy.
+        </p>
+      </div>
+      <p>Hoy no medimos familias — ajustamos una recta a datos, con las herramientas que acabas de aprender.</p>
+    </div>
+  </section>
+
+  <!-- ============ 15 · CONSTRUYENDO X Y XᵀX ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">De los datos a la matriz</span>
+      <h2 class="slide-title">Construyendo X y XᵀX</h2>
+      <p>
+        Quieres $\hat{y}=w_0+w_1x$ que minimice el error al cuadrado. La <b>matriz de diseño</b> $X$:
+        una fila por observación, columna de 1's (intercepto) + variables.
+      </p>
+      <div class="big-math">$$X^\top X\,w = X^\top y \;\Longrightarrow\; w = (X^\top X)^{-1}X^\top y$$</div>
+      <div class="callout">
+        <p class="callout-title">💡 ¿Por qué $X^\top X$ y no $X$?</p>
+        <p>$X$ casi nunca es cuadrada (más observaciones que variables). $X^\top X$ SIEMPRE es
+        cuadrada y simétrica — recién ahí tiene sentido invertirla.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 16 · CÁLCULO COMPLETO EN VIVO ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Live coding en la pizarra</span>
+      <h2 class="slide-title">Calculando w, paso a paso</h2>
+      <p>3 estudiantes, horas de estudio ($x$) y nota ($y$): $(1,52),\ (2,58),\ (3,65)$.</p>
+      <div class="big-math">
+        $$X^\top X = \begin{pmatrix}3&6\\6&14\end{pmatrix}\;\; \det=6 \qquad
+        (X^\top X)^{-1} = \begin{pmatrix}7/3&-1\\-1&1/2\end{pmatrix} \qquad
+        w = \begin{pmatrix}45.33\\6.5\end{pmatrix}$$
+      </div>
+      <div class="callout">
+        <p class="callout-title">📈 Interpretación</p>
+        <p>Cada hora extra de estudio suma en promedio <b>6.5 puntos</b> a la nota. El 45.33 es lo
+        que "predice" el modelo con 0 horas — extrapolación, no lo tomes literal.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 17 · MULTICOLINEALIDAD ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Cuándo el modelo falla</span>
+      <h2 class="slide-title">Multicolinealidad</h2>
+      <p>
+        Dos variables que cargan casi la misma información. Caso real: en un estudio de presión
+        arterial, "área de superficie corporal" y "peso" resultaron correlacionados en <b>0.875</b>.
+      </p>
+      <div class="callout warn">
+        <p class="callout-title">⚠️ Consecuencia matemática</p>
+        <p>
+          Columna redundante → columnas de $X^\top X$ proporcionales → $\det(X^\top X)=0$ →
+          <b>NO existe $(X^\top X)^{-1}$</b> → $w$ no se puede calcular. Peor aún si es "casi" cero:
+          la inversa sale con números gigantes e inestables, parece funcionar pero no sirve.
+        </p>
+      </div>
+      <p class="hint">Diagnóstico práctico: calcula $\det(X^\top X)$. Si es (casi) cero, hay una columna redundante que hay que quitar.</p>
+    </div>
+  </section>
+
+  <!-- ============ 18 · QUIZ ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">Comprueba lo aprendido</span>
+      <h2 class="slide-title">Quiz de la clase</h2>
+      <p>Mismo formato de las evaluaciones de Blackboard. Responde y presiona <b>Calificar</b>.</p>
+      <div id="quiz-clase02"></div>
+    </div>
+  </section>
+
+  <!-- ============ 19 · COLAB ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <span class="slide-kicker">A programar 🐍</span>
+      <h2 class="slide-title">Práctica en Google Colab</h2>
+      <p>
+        El notebook de hoy programa lo que hiciste a mano: construir $X$, calcular $X^\top X$, su
+        determinante e inversa, obtener $w$, y diagnosticar multicolinealidad.
+      </p>
+      <div class="colab-box">
+        <span class="icon">🐍</span>
+        <div class="txt">
+          <p><b>Notebook · Clase 02:</b> Regresión lineal desde cero.</p>
+          <p>Se abre y se ejecuta en tu navegador con tu cuenta de Google. Nada que instalar.</p>
+        </div>
+        <a class="colab-btn" data-notebook="notebooks/clase-02.ipynb" href="#">▶ Abrir en Colab</a>
+      </div>
+      <div class="callout ia">
+        <p class="callout-title">🔗 Antes de la próxima clase</p>
+        <p>
+          La Clase 03 resuelve $Ax=b$ con el método de Gauss para modelar un mini-perceptrón.
+          Resuelve con cualquier método que ya conozcas:
+          $\begin{cases}2x+y=8\\x-y=1\end{cases}$ — y trae tu respuesta.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 20 · CIERRE ============ -->
+  <section class="slide cierre">
+    <div class="slide-inner">
+      <img class="logo-uees" src="../../assets/logo-uees.png" alt="UEES" style="height:3.2rem;margin-bottom:1rem">
+      <h2 class="slide-title" style="border:none">Lo que te llevas hoy</h2>
+      <div class="type-grid" style="text-align:left">
+        <div class="type-card"><div class="t-name">✔ Inversa</div><p class="hint">"deshace" una matriz; existe solo si $\det(A)\neq0$</p></div>
+        <div class="type-card"><div class="t-name">✔ Determinante</div><p class="hint">mide si una matriz "aplasta" el espacio — geometría, no solo álgebra</p></div>
+        <div class="type-card"><div class="t-name">✔ Regresión</div><p class="hint">$w=(X^\top X)^{-1}X^\top y$ — los pesos exactos, calculados a mano</p></div>
+        <div class="type-card"><div class="t-name">✔ Multicolinealidad</div><p class="hint">columnas redundantes → $\det(X^\top X)=0$ → sin solución única</p></div>
+      </div>
+      <p style="margin-top:2rem">
+        <b>Próxima clase:</b> sistemas de ecuaciones y el método de Gauss — modelando un
+        mini-perceptrón. 🧠
+      </p>
+      <div class="meta-row" style="margin-top:1rem">
+        <a class="colab-btn" href="../clase-01/index.html">← Clase 01</a>
+        <a class="colab-btn" href="../clase-03/index.html" style="background:var(--accent);color:#fff">Ir a la Clase 03 →</a>
       </div>
     </div>
   </section>
 
 </div>
 
+<script src="../../js/common.js"></script>
+<script src="../../js/quiz.js"></script>
+<script src="../../js/viz/matrix-viz.js"></script>
 <script src="../../js/slides.js"></script>
-<script>initDeck({ label: "Clase 02 · Álgebra Lineal UMAT205" });</script>
+<script>
+  // Demos interactivas
+  initInverseCalc2x2("demo-inverse2x2");
+  initInverseGaussJordan("demo-inverse-gj");
+
+  // Quiz (formato Blackboard: opción múltiple + proceso)
+  const PREGUNTAS = [
+    {
+      q: "¿Qué condición determina si una matriz cuadrada A es invertible?",
+      opts: ["Que sea simétrica", "Que su determinante sea distinto de cero", "Que todos sus elementos sean positivos", "Que sea triangular"],
+      correct: 1,
+      explain: "$A$ es invertible ⟺ $\\det(A) \\neq 0$. Si $\\det(A)=0$, $A$ es singular y no tiene inversa.",
+    },
+    {
+      q: "Si $A=\\begin{pmatrix}2&5\\\\1&3\\end{pmatrix}$, entonces $A^{-1}$ es…",
+      opts: [
+        "$\\begin{pmatrix}3&-5\\\\-1&2\\end{pmatrix}$",
+        "$\\begin{pmatrix}3&5\\\\1&2\\end{pmatrix}$",
+        "$\\begin{pmatrix}2&-5\\\\-1&3\\end{pmatrix}$",
+        "No tiene inversa",
+      ],
+      correct: 0,
+      explain: "$\\det(A)=2(3)-5(1)=1$. Intercambia la diagonal, cambia signos de los otros dos, divide entre 1: $\\begin{pmatrix}3&-5\\\\-1&2\\end{pmatrix}$.",
+    },
+    {
+      q: "El determinante de $A=\\begin{pmatrix}4&2\\\\3&1\\end{pmatrix}$ es…",
+      opts: ["$-2$", "$2$", "$-10$", "$10$"],
+      correct: 0,
+      explain: "$\\det(A)=4(1)-2(3)=4-6=-2$.",
+    },
+    {
+      q: "Si $A$ y $B$ son invertibles, $(AB)^{-1}$ es igual a…",
+      opts: ["$A^{-1}B^{-1}$", "$B^{-1}A^{-1}$", "$(AB)^\\top$", "$AB$"],
+      correct: 1,
+      explain: "La inversa de un producto invierte el orden: $(AB)^{-1}=B^{-1}A^{-1}$ — igual que quitarte primero los zapatos para deshacer \"medias y luego zapatos\".",
+    },
+    {
+      q: "El determinante de $A=\\begin{pmatrix}1&2&1\\\\0&1&3\\\\2&1&0\\end{pmatrix}$ (Regla de Sarrus) es…",
+      opts: ["$7$", "$12$", "$5$", "$-7$"],
+      correct: 0,
+      explain: "Diagonales ↘: $a_{11}a_{22}a_{33}+a_{12}a_{23}a_{31}+a_{13}a_{21}a_{32}=1(1)(0)+2(3)(2)+1(0)(1)=0+12+0=12$. Diagonales ↗: $a_{13}a_{22}a_{31}+a_{11}a_{23}a_{32}+a_{12}a_{21}a_{33}=1(1)(2)+1(3)(1)+2(0)(0)=2+3+0=5$. $\\det=12-5=7$.",
+    },
+    {
+      q: "Si $\\det(A)=0$ para una matriz cuadrada A, el sistema $Ax=b$…",
+      opts: [
+        "Siempre tiene infinitas soluciones",
+        "Siempre no tiene solución",
+        "NO tiene solución única (puede ser infinitas o ninguna, según b)",
+        "Siempre tiene una solución única distinta de cero",
+      ],
+      correct: 2,
+      explain: "$\\det(A)=0$ descarta la solución única. El caso real (infinitas vs. ninguna) depende de $b$ — repaso de la Clase 01, Ejercicio G.",
+    },
+    {
+      q: "Geométricamente, en 2D, $|\\det(A)|$ representa…",
+      opts: ["El perímetro del cuadrilátero formado por las columnas", "El área del paralelogramo formado por las columnas de A", "La suma de todos los elementos de A", "El promedio de los elementos de A"],
+      correct: 1,
+      explain: "Las columnas de A son dos vectores; $|\\det(A)|$ es el área del paralelogramo que forman. Si da 0, el paralelogramo se aplastó a una línea.",
+    },
+    {
+      q: "En una matriz de diseño X para regresión, si dos columnas son proporcionales entre sí (multicolinealidad perfecta), $\\det(X^\\top X)$…",
+      opts: ["Es siempre 1", "Es 0", "Es igual al número de observaciones", "No se puede calcular"],
+      correct: 1,
+      explain: "Columnas proporcionales en X hacen que las columnas de $X^\\top X$ también sean proporcionales — por la propiedad de determinantes, $\\det(X^\\top X)=0$.",
+    },
+    {
+      q: "La fórmula de los pesos de una regresión lineal por mínimos cuadrados es…",
+      opts: ["$w = X^{-1}y$", "$w = (X^\\top X)^{-1}X^\\top y$", "$w = X^\\top X\\, y$", "$w = (XX^\\top)^{-1}y$"],
+      correct: 1,
+      explain: "La ecuación normal $X^\\top X\\,w=X^\\top y$ da $w=(X^\\top X)^{-1}X^\\top y$, siempre que $X^\\top X$ sea invertible.",
+    },
+    {
+      q: "¿Por qué se invierte $X^\\top X$ y no $X$ directamente?",
+      opts: [
+        "Porque X nunca tiene números negativos",
+        "Porque X casi nunca es cuadrada, pero X^T X siempre es cuadrada y simétrica",
+        "Porque invertir X es ilegal en estadística",
+        "No hay ninguna razón, es solo convención",
+      ],
+      correct: 1,
+      explain: "Con más observaciones que variables, X no es cuadrada y no tiene inversa propia. $X^\\top X$ SIEMPRE es cuadrada ($p\\times p$) y simétrica.",
+    },
+    {
+      q: "El determinante de la matriz triangular $\\begin{pmatrix}2&5&1\\\\0&3&7\\\\0&0&4\\end{pmatrix}$ es…",
+      opts: ["$24$", "$2+3+4=9$", "$10$", "No se puede calcular sin Sarrus completo"],
+      correct: 0,
+      explain: "En una matriz triangular, el determinante es simplemente el producto de la diagonal principal: $2\\times3\\times4=24$ — no hace falta Sarrus.",
+    },
+    {
+      q: "En el caso real del estudio de presión arterial (multicolinealidad), ¿qué dos variables estaban fuertemente correlacionadas (r=0.875)?",
+      opts: ["Edad y pulso", "Área de superficie corporal (BSA) y peso", "Presión sistólica y diastólica", "Altura y edad"],
+      correct: 1,
+      explain: "BSA y peso miden prácticamente lo mismo (una persona más pesada tiene más superficie corporal) — el ejemplo clásico de multicolinealidad en STAT 501 de Penn State.",
+    },
+  ];
+
+  window.addEventListener("DOMContentLoaded", () => {
+    renderQuiz("quiz-clase02", PREGUNTAS);
+    if (window.renderMathInElement) {
+      renderMathInElement(document.body, KATEX_OPTS);
+    }
+    initDeck({ label: "Clase 02 · Inversa y determinante · Álgebra Lineal UMAT205" });
+  });
+</script>
 </body>
 </html>

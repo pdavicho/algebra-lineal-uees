@@ -48,7 +48,7 @@ const COURSE = [
     desc: "Representar un sistema como matriz aumentada y resolverlo con Gauss — la misma operación detrás de una capa lineal de una red neuronal.",
     temas: ["2.1 Representación matricial de un sistema", "2.2 Resolución por el método de Gauss"],
     reto: "Reto Colab · \"Encontrando los pesos exactos\": Ax=b como mini-perceptrón con restricciones exactas, eliminación de Gauss en NumPy, verificación con un forward pass.",
-    listo: false,
+    listo: true,
   },
   {
     num: 4, unidad: 2, semana: 4, rda: "RDA2",
